@@ -1,0 +1,9 @@
+#NEXUS
+BEGIN taxa; DIMENSIONS ntax=4; TAXLABELS [1] mac [2] human [3] rat [4] giraffe ; END;
+BEGIN distances; DIMENSIONS ntax=4; FORMAT triangle=LOWER diagonal labels missing=? ;
+MATRIX 
+mac 0
+human 1 0
+rat 1 1 0
+giraffe 1 1 1 0
+; END;
