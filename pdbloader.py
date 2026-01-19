@@ -92,7 +92,7 @@ def extract_seqrecords(pdbcode, struct):
         seqrec = Bio.SeqRecord.SeqRecord(seq, id=seqid, 
             description="Sequence #{}, {}".format(i+1, seqid))
         seqrecords.append(seqrec)
-    return seqrecords, seq
+    return seqrecords
 
 def get_calphas(struct):
     """
