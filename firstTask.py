@@ -10,7 +10,9 @@ import re
 fasta_out="/home/joscha/DataQtools/output/bd85b277-d586-4eae-9e21-7d6f05162788.fasta"
 structures=[]
 sequences=[]
-seqrecords=[]
+#seqrecords=[]
+pdbcodes=[]
+
 regex= re.compile("(?<=AF-)[^-]*")
 z=0
 
@@ -18,9 +20,11 @@ for file in os.scandir("/home/joscha/DataQtools/bd85b277-d586-4eae-9e21-7d6f0516
     if file.path.endswith(".pdb"):
         print("File_Found:", file.path)
         structures.append(read_pdb(re.findall(regex,repr(file))[0],file.path))
-        seqrecords.append(extract_seqrecords(re.findall(regex,repr(file))[0],structures[-1]))
+        pdbcodes.append(re.findall(regex,repr(file))[0])
+        #seqrecords.append(extract_seqrecords(re.findall(regex,repr(file))[0],structures[-1]))
         z+=1
-
+print(pdbcodes)
+seqrecords=extract_multi_seqrecords(pdbcodes,structures)
 print(seqrecords)
 SeqIO.write(seqrecords[0], fasta_out, "fasta")
 

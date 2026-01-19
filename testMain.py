@@ -4,7 +4,7 @@ import os
 #struct= download_read_pdb("7R3M", os.getcwd()+"")
 struct= read_pdb("7R3M","7R3M.pdb")
 calphas= get_calphas(struct)
-print(extract_seqrecords("7R3M",struct))
+print(extract_seqrecords("7R3M",struct)[1])
 print(struct)
 
 

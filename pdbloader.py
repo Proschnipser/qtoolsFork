@@ -94,6 +94,29 @@ def extract_seqrecords(pdbcode, struct):
         seqrecords.append(seqrec)
     return seqrecords
 
+def extract_multi_seqrecords(pdbcodes, structures):
+    """
+    Extracts the sequence records from a Bio.PDB structure.
+    :param pdbcode: the PDB ID of the structure, needed to add a sequence ID to the result
+    :param struct: a Bio.PDB.Structure object
+    :return: a list of Bio.SeqRecord objects
+    """
+    ppb = Bio.PDB.PPBuilder()
+    seqrecords = []
+    z=0
+    for struct in structures:
+        z+=1
+        for i, chain in enumerate(struct.get_chains()):
+            # extract and store sequences as list of SeqRecord objects
+            pps = ppb.build_peptides(chain)    # polypeptides
+            seq = pps[0].get_sequence() # just take the first, hope there's no chain break
+            seqid = pdbcodes[z-1] +"_"+ chain.id
+            seqrec = Bio.SeqRecord.SeqRecord(seq, id=seqid, 
+                description="Sequence #{}, {}".format(z, seqid))
+            seqrecords.append(seqrec)
+        
+    return seqrecords
+
 def get_calphas(struct):
     """
     Extracts the C-alpha atoms from a PDB structure.
