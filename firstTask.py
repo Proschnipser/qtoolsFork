@@ -26,7 +26,7 @@ for file in os.scandir("/home/joscha/DataQtools/bd85b277-d586-4eae-9e21-7d6f0516
 print(pdbcodes)
 seqrecords=extract_multi_seqrecords(pdbcodes,structures)
 print(seqrecords)
-SeqIO.write(seqrecords[0], fasta_out, "fasta")
+SeqIO.write(seqrecords, fasta_out, "fasta")
 
 
 
