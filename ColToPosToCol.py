@@ -17,6 +17,12 @@ def IndexConverter(MSAseq):
 
     return poscolIdxs, colposIdxs
 
+def MuliIndexConverter(MSAseqs):
+    posColIdx=[]
+    for MSAseq in MSAseqs:
+        posColIdx.append(IndexConverter(MSAseq))
+
+
 def main():
     sequences=["FPIKWTAPEAALYGRFTIKSDVWSFGILLTKGRVPYPGMVNREVLDQVERG","FPIKWTAPEAALYGRFTIKSDVWSFGILLTELVTKGRVVMVNREVLEQVERG"]
     MSAseqs=["-FPIKWTAPEAALY---GRFTIKSDVWSFGILL----TKGRVPYPGMVNR-EVLDQVERG","FPIKWTAPEAALY---GRFTIKSDVWSFGILLTELVTKGRV--TV-MVNR-EVLEQVERG"]

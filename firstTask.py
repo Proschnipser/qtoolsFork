@@ -5,7 +5,8 @@ from Bio import SeqIO, Seq
 from Bio.Align.Applications import ClustalwCommandline
 from Bio import Align
 import re
-
+from ColToPosToCol import *
+import random
 
 
 # fasta_out="/home/joscha/DataQtools/output/bd85b277-d586-4eae-9e21-7d6f05162788.fasta"
@@ -49,7 +50,12 @@ print(stdout)
 
 alignments = Align.read(fasta_out.replace(".fasta",".aln"), "clustal")
 
-print(alignments.metadata)
-alignment = next(alignments)
+# print(alignments.metadata)
+# alignment = next(alignments)
 
-print(alignment)
+print(alignments)
+# posColIdx=[]
+# for MSAseq in alignments:
+#     posColIdx.append(IndexConverter(MSAseq))
+
+# print(posColIdx[0])
