@@ -59,3 +59,12 @@ print(alignments)
 #     posColIdx.append(IndexConverter(MSAseq))
 
 # print(posColIdx[0])
+i=0
+rndColumn=[]
+while(i<10):
+    rndColumn.append(random.randrange(len(alignments[0])))
+    for alig in alignments:
+        if alig[rndColumn[i]].isalpha:
+            i+=1
+        else:
+            break
