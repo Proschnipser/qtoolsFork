@@ -3,11 +3,17 @@ import os
 from Bio.PDB.MMCIFParser import MMCIFParser
 from Bio import SeqIO, Seq
 from Bio.Align.Applications import ClustalwCommandline
+from Bio import Align
 import re
 
 
 
-fasta_out="/home/joscha/DataQtools/output/bd85b277-d586-4eae-9e21-7d6f05162788.fasta"
+# fasta_out="/home/joscha/DataQtools/output/bd85b277-d586-4eae-9e21-7d6f05162788.fasta"
+pdb_dir="/data/joscha/Data/6df16995-6ece-4dc0-92c3-f776066b0bfb"
+fasta_out=os.path.dirname(pdb_dir)+"/output/"+os.path.basename(pdb_dir)+".fasta"
+print(fasta_out )
+os.makedirs(os.path.dirname(fasta_out),exist_ok=True)
+
 structures=[]
 sequences=[]
 #seqrecords=[]
@@ -16,7 +22,7 @@ pdbcodes=[]
 regex= re.compile("(?<=AF-)[^-]*")
 z=0
 
-for file in os.scandir("/home/joscha/DataQtools/bd85b277-d586-4eae-9e21-7d6f05162788"):
+for file in os.scandir(pdb_dir):
     if file.path.endswith(".pdb"):
         print("File_Found:", file.path)
         structures.append(read_pdb(re.findall(regex,repr(file))[0],file.path))
@@ -41,8 +47,9 @@ clustalw_cline = ClustalwCommandline(
 stdout, stderr = clustalw_cline()
 print(stdout)
 
-#extract_seqrecords("7R3M",struct)[1]
+alignments = Align.read(fasta_out.replace(".fasta",".aln"), "clustal")
 
-# struct= read_pdb("O14746","/home/joscha/DataQtools/bd85b277-d586-4eae-9e21-7d6f05162788/AF-O14746-F1-model_v6.pdb")
-# print(extract_seqrecords("O14746",struct))
-# struct.get_se
+print(alignments.metadata)
+alignment = next(alignments)
+
+print(alignment)
