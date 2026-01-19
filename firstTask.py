@@ -59,12 +59,18 @@ print(alignments)
 #     posColIdx.append(IndexConverter(MSAseq))
 
 # print(posColIdx[0])
+
 i=0
-rndColumn=[]
+rndColumns=[]
 while(i<10):
-    rndColumn.append(random.randrange(len(alignments[0])))
+    rndColumns.append(random.randrange(len(alignments[0])))
     for alig in alignments:
-        if alig[rndColumn[i]].isalpha:
-            i+=1
+        print(rndColumns[i])
+        if alig[rndColumns[i]].isalpha():
+            continue
         else:
+            print("Upps:",rndColumns[i],alig[rndColumns[i]])
+            rndColumns[i]=random.randrange(len(alignments[0]))
             break
+    i+=1
+print(rndColumns)
