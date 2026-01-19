@@ -7,7 +7,10 @@ for file in os.scandir("/home/joscha/DataQtools/bd85b277-d586-4eae-9e21-7d6f0516
     if file.path.endswith(".cif"):
         print("File_Found:", file.path)
         structures.append(read_cif("O14746",file.path))
-# struct=MMCIFParser("O14746",files.path)
+print(type(repr(structures[0])))
+
+# for struct in structures:
+#     extract_seqrecords()
 print(structures)
 #extract_seqrecords("7R3M",struct)[1]
 
