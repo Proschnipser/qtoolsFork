@@ -110,7 +110,7 @@ def extract_multi_seqrecords(pdbcodes, structures):
             # extract and store sequences as list of SeqRecord objects
             pps = ppb.build_peptides(chain)    # polypeptides
             seq = pps[0].get_sequence() # just take the first, hope there's no chain break
-            seqid = pdbcodes[z-1] +"_"+ chain.id
+            seqid = pdbcodes[z-1] #+"_"+ chain.id
             seqrec = Bio.SeqRecord.SeqRecord(seq, id=seqid, 
                 description="Sequence #{}, {}".format(z, seqid))
             seqrecords.append(seqrec)
@@ -126,13 +126,25 @@ def get_calphas(struct):
     calphas = [ atom for atom in struct.get_atoms() if atom.get_fullname() == " CA " ]
     return calphas #https://stackoverflow.com/questions/10324674/parsing-a-pdb-file-in-python
 
-def calc_distance_matrix(atoms):
+def calc_distance_matrix(atoms,flatten:bool):
     """Calculate the distance matrix for a list of atoms."""
     num_atoms = len(atoms)
+    
+    if flatten:
+        distance_mtxflat=[]
+        
+        for i in range(len(atoms)):
+            j=i+1
+            while j<len(atoms):
+                if j > i:
+                    distance_mtxflat.append(atoms[i] - atoms[j])# This uses the overridden '-' operator to calculate distance
+                j+=1
+        return distance_mtxflat
+   
     distance_matrix = np.zeros((num_atoms, num_atoms))
-
     for i, atom1 in enumerate(atoms):
         for j, atom2 in enumerate(atoms):
             distance_matrix[i, j] = atom1 - atom2  # This uses the overridden '-' operator to calculate distance
-
+    
+        
     return distance_matrix #https://bioinformatics.stackexchange.com/questions/22675/how-can-i-compute-distance-matrices-from-a-pdb-file
