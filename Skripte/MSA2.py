@@ -36,11 +36,12 @@ fasta_out=os.path.splitext(filepath)[0]+"_names.fasta"
 threshold_length=100
 seqrecords=extract_seqrecords(df, threshold_length)
 SeqIO.write(seqrecords, fasta_out, "fasta")
-sample_size=100
+sample_size=len(seqrecords)
 aln_path=fasta_out.replace(".fasta",f"_thresh{threshold_length}aa_{sample_size}.fa")
 aln_nex= aln_path.replace(".fa",".nex")
 #aln_path_phy= aln_path.replace(".fa",".phy")
 tree_path=aln_path.replace(".fa",".dnd")
+print(f"clustalo -i {fasta_out} -o {aln_path} --outfmt=a2m --guidetree-out={tree_path} --force")
 os.system(f"clustalo -i {fasta_out} -o {aln_path} --outfmt=a2m --guidetree-out={tree_path} --force")
 records = list(SeqIO.parse(aln_path, "fasta"))
 for record in records:
@@ -49,7 +50,7 @@ for record in records:
     record.id = re.sub(r"[^a-zA-Z0-9_]", "_", record.id)
     record.name = record.id
     record.description = ""
-records=random.sample(records, k=sample_size)
+#records=random.sample(records, k=sample_size)
 alignment = MultipleSeqAlignment(records)
 print(aln_path)
 print(aln_nex)

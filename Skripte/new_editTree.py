@@ -2,6 +2,7 @@ from ete3 import Tree
 import pandas as pd
 import re
 import os
+import sys
 
 
 def get_terminal_species_for_edges(tree):
@@ -85,15 +86,19 @@ def name_nodes_by_taxa(tree, edge_data, df):
     return tree
 
 
-df = pd.read_csv("/data/joscha/Data/TANGO1onlySP_dedup.csv", index_col='no.')
-newick_file = "/data/joscha/Data/output/TANGO1onlySP_dedup_names_aln.tree"
+df = pd.read_csv("/data/joscha/Data/uniprot_2025_01_08_MIAs_02_MOTHs.csv", index_col='no.')
+#newick_file = "/data/joscha/Data/output/TANGO1onlySP_dedup_names_aln.tree"
+filepath=sys.argv[1]
+newick_file= filepath
 tree = Tree(newick_file)
 edge_data = get_terminal_species_for_edges(tree)
 tree= name_nodes_by_taxa(tree,edge_data, df)
 # for node in tree.traverse("postorder"):
 #     print(node)
 
-tree.write(outfile="/data/joscha/Data/output/TANGO1onlySP_dedup_names_aln_annotated.tree", format=1)
+output= filepath.replace(".tree", "_annotatedOC.tree").replace(".nwk", "_annotatedOC.tree")
+print(output)
+tree.write(outfile=output, format=1)
 # Print results
 # for edge, terminals in edge_data.items():
 #     print(f"Edge/Node: {edge}")
