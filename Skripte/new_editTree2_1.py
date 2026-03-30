@@ -82,7 +82,7 @@ def name_nodes_by_taxa(tree, edge_data, df):
                     idlist.append(int(m.group()))
             print(idlist)
             node.name = find_taxa(idlist, df)
-            node.name=str(i)+" "+node.name
+            node.name="'"+str(i)+" "+node.name+"'"
             print(f"Named node: {node.name}")
             i+=1
     return tree
@@ -98,7 +98,7 @@ tree= name_nodes_by_taxa(tree,edge_data, df)
 # for node in tree.traverse("postorder"):
 #     print(node)
 
-output= filepath.replace(".tree", "_annotatedOC.tree").replace(".nwk", "_annotatedOC.tree")
+output= filepath.replace("con.tree", "_annotatedOC.tree").replace(".nwk", "_annotatedOC.tree")
 print(output)
 tree.write(outfile=output, format=1)
 # Print results

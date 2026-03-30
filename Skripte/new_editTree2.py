@@ -73,7 +73,7 @@ def name_nodes_by_taxa(tree, edge_data, df):
                     idlist.append(int(m.group()))
             print(idlist)
             node.name = find_taxa(idlist, df)
-            node.name=str(i)+" "+node.name
+            node.name="'"+str(i)+" "+node.name+"'"
             print(f"Named node: {node.name}")
             i+=1
     return tree
