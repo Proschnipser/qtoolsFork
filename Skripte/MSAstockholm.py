@@ -35,7 +35,7 @@ threshold_length=100
 seqrecords=extract_seqrecords(df, threshold_length)
 SeqIO.write(seqrecords, fasta_out, "fasta")
 sample_size=len(seqrecords)
-aln_path=fasta_out.replace(".fasta",f"_{sample_size}.fa")
+aln_path=fasta_out.replace(".fasta",".fa")
 aln_sto= aln_path.replace(".fa",".sto")
 #aln_path_phy= aln_path.replace(".fa",".phy")
 tree_path=aln_path.replace(".fa",".dnd")

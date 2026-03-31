@@ -11,7 +11,7 @@ unique=set()
 genuslist=set()
 indices=[]
 for i,r in df.iterrows():
-    seq=r["Sequence cutted"]
+    seq=r["Sequence"]
     if seq in unique or r["OS"] in genuslist: # check wether sequence is unique
         indices.append(i)
     else:
@@ -19,6 +19,6 @@ for i,r in df.iterrows():
         genuslist.add(r["OS"])
 df.drop(indices, inplace=True)
 print(len(unique))
-outputpath=os.path.splitext(filepath)[0]+"_dedup_reduced.csv"
+outputpath=os.path.splitext(filepath)[0]+"_dedup_reduced_long.csv"
 print(outputpath)
 df.to_csv(outputpath, index=False) # return deduplicated csv file.
