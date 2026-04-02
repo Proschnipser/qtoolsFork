@@ -29,13 +29,13 @@ tasks=[]
 commands=[]
 for file in fna_files:
     print(file)
-    chunked=Path(str(file).replace(".fna","_chunked.fna"))
-    command=f"seqkit sliding -s 240000 -W 270000 {str(file)} > {chunked}"
-    os.system(command)
+    #chunked=Path(str(file).replace(".fna","_chunked.fna"))
+    #command=f"seqkit sliding -s 240000 -W 270000 {str(file)} > {chunked}"
+    #os.system(command)
     #commands.append(command)
     for model in hmmer_models.iterdir():
         if model.is_file():
-            tasks.append((hmmer_hits, chunked,model))
+            tasks.append((hmmer_hits, file,model))
 
 # with Pool(processes=max(1, os.cpu_count() - 1)) as pool:
 #     pool.map(os.system, commands)
