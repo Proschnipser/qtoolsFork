@@ -29,7 +29,7 @@ tasks=[]
 commands=[]
 for file in fna_files:
     print(file)
-    # chunked=Path(str(file).replace(".fna","_chunked.fna"))
+    chunked=Path(str(file).replace(".fna","_chunked.fna"))
     # command=f"seqkit sliding -s 240000 -W 270000 {str(file)} > {chunked}"
     # os.system(command)
     # commands.append(command)
