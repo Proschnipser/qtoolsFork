@@ -35,7 +35,7 @@ for file in fna_files:
     # commands.append(command)
     for model in hmmer_models.iterdir():
         if model.is_file():
-            tasks.append((hmmer_hits, file,model))
+            tasks.append((hmmer_hits, chunked,model))
 
 # with Pool(processes=max(1, os.cpu_count() - 1)) as pool:
 #     pool.map(os.system, commands)
