@@ -26,9 +26,8 @@ for filepath in Path(directory).rglob("*.tbl"):
     for col in ['reg', 'clu', 'ov', 'env', 'dom', 'rep', 'inc']:
         df[col] = df[col].astype(int)
 
-    #print(df.head())
-    print(df)
-    break
+    print(df.head())
+    #print(df)
     splitname=filepath.split("_")
     dfdict[splitname[1]][splitname[-1]]=df
 
