@@ -19,14 +19,14 @@ for filepath in Path(directory).rglob("*.tbl"):
         content = ''.join(l for l in f if not l.startswith('#'))
 
     df = pd.read_csv(StringIO(content), sep=r'\s+', header=None, names=COLS, usecols=range(19))
-
+    print(filepath)
     # Cast numeric columns
     for col in ['e_value', 'score', 'bias', 'e_value_best', 'score_best', 'bias_best', 'exp']:
         df[col] = df[col].astype(float)
     for col in ['reg', 'clu', 'ov', 'env', 'dom', 'rep', 'inc']:
         df[col] = df[col].astype(int)
 
-    print(df.head())
+    #print(df.head())
     print(df)
     break
     splitname=filepath.split("_")
