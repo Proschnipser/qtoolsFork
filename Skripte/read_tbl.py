@@ -14,7 +14,7 @@ COLS = [
 
 directory="/data/joscha/output/hmmer_hits_long/" #sys.argv[1]
 dfdict=defaultdict(dict)
-for filepath in Path(directory).rglob(".tbl"):
+for filepath in Path(directory).rglob("*.tbl"):
     with open(file) as f:
         content = ''.join(l for l in f if not l.startswith('#'))
 
@@ -28,6 +28,7 @@ for filepath in Path(directory).rglob(".tbl"):
 
     print(df.head())
     print(df)
+    break
     splitname=filepath.split("_")
     dfdict[splitname[1]][splitname[-1]]=df
 
