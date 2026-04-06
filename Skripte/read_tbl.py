@@ -27,12 +27,13 @@ for filepath in Path(directory):
         df[col] = df[col].astype(int)
 
     print(df.head())
+    print(df)
     splitname=filepath.split("_")
     dfdict[splitname[1]][splitname[-1]]=df
 
 
 
-for k1,v1 in dfdict.items():
-    for k2, v2 in v1.items():
-        for i, r in v2.iterrows():
-            r[]
+# for k1,v1 in dfdict.items():
+#     for k2, v2 in v1.items():
+#         for i, r in v2.iterrows():
+#             if r["length"] >
