@@ -14,7 +14,7 @@ COLS = [
 
 directory="/data/joscha/output/hmmer_hits_long/" #sys.argv[1]
 dfdict=defaultdict(dict)
-for filepath in Path(directory):
+for filepath in Path(directory).rglob(".tbl"):
     with open(file) as f:
         content = ''.join(l for l in f if not l.startswith('#'))
 
