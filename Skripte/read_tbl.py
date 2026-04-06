@@ -15,7 +15,7 @@ COLS = [
 directory="/data/joscha/output/hmmer_hits_long/" #sys.argv[1]
 dfdict=defaultdict(dict)
 for filepath in Path(directory).rglob("*.tbl"):
-    with open(file) as f:
+    with open(filepath) as f:
         content = ''.join(l for l in f if not l.startswith('#'))
 
     df = pd.read_csv(StringIO(content), sep=r'\s+', header=None, names=COLS, usecols=range(19))
