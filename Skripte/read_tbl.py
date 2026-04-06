@@ -33,7 +33,7 @@ for filepath in Path(directory).rglob("*.tbl"):
 
 
 
-# for k1,v1 in dfdict.items():
-#     for k2, v2 in v1.items():
-#         for i, r in v2.iterrows():
-#             if r["length"] >
+for k1,v1 in dfdict.items():
+    for k2, v2 in v1.items():
+        for i, r in v2.iterrows():
+            
