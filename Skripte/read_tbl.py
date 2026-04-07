@@ -68,6 +68,8 @@ for k1,v1 in dfdict.items(): #iterate over genomes
         fna_files = list(Path(cyclostomata+"/"+orflist[-2]).rglob("*.fna"))
         if fna_files == []:
                 fna_files = list(Path(chondrichthyes+"/"+orflist[-2]).rglob("_chunked.fna"))
+        os.system(f"esl-sfetch --index {fna_files[0]}")
+        os.system(f"esl-sfetch -c {orflist}")
     
         
 
