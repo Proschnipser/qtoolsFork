@@ -54,7 +54,7 @@ orfdf=pd.DataFrame()
 for k1,v1 in dfdict.items(): #iterate over genomes
     for k2, v2 in v1.items(): #iterate over protein types
         for i, r in v2.iterrows():
-            print(i,r)
+            print(r)
             
 
             
