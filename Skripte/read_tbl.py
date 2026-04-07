@@ -27,9 +27,7 @@ for filepath in Path(directory).rglob("*.tbl"):
 
     df = pd.DataFrame(rows, columns=COLS)
 
-    # Cast float columns
-    for col in ['e_value', 'score', 'bias', 'e_value_best', 'score_best', 'bias_best', 'exp']:
-        df[col] = df[col].astype(float)
+   
 
     # Extract full multi-word desc= value
     df['desc'] = df['description'].str.extract(r'desc=(.+)$')
@@ -42,13 +40,14 @@ for filepath in Path(directory).rglob("*.tbl"):
     desc_df = df['description'].apply(parse_kv).apply(pd.Series)
     df = pd.concat([df.drop(columns='description'), desc_df], axis=1)
 
-    # Cast int columns
+     # Cast float columns
+    for col in ['e_value', 'score', 'bias', 'e_value_best', 'score_best', 'bias_best', 'exp']:
+        df[col] = df[col].astype(float)
     for col in ['reg', 'clu', 'ov', 'env', 'dom', 'rep', 'inc', 'length']:
         if col in df.columns:
             df[col] = df[col].astype(int)
 
     print(df)
-    break
     splitname=str(filepath).split("_")
     dfdict[splitname[1]][splitname[-1]]=df
 
