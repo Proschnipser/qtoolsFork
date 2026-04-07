@@ -49,9 +49,8 @@ for filepath in Path(directory).rglob("*.tbl"):
 
     print(df)
     splitname=str(filepath).split("_")
-    print(splitname[1], splitname[-1])
+    print(splitname[1], filter(str.isupper,splitname[-1]))
     dfdict[splitname[1]][splitname[-1]]=df
-    break
 
 
 # for k1,v1 in dfdict.items():
