@@ -16,31 +16,35 @@ COLS = [
 directory="/data/joscha/output/hmmer_hits_long/" #sys.argv[1]
 dfdict=defaultdict(dict)
 for filepath in Path(directory).rglob("*.tbl"):
+    rows = []
     with open(filepath) as f:
-        content = ''.join(l for l in f if not l.startswith('#'))
+        for line in f:
+            if line.startswith('#') or not line.strip():
+                continue
+            parts = line.split()
+            rows.append(parts[:18] + [' '.join(parts[18:])])
 
-    
-    df = pd.read_csv(StringIO(content), sep=r'\s+', header=None, names=COLS, usecols=range(19))
+    df = pd.DataFrame(rows, columns=COLS)
 
-    
+    # Cast float columns
+    for col in ['e_value', 'score', 'bias', 'e_value_best', 'score_best', 'bias_best', 'exp']:
+        df[col] = df[col].astype(float)
 
     # Extract full multi-word desc= value
     df['desc'] = df['description'].str.extract(r'desc=(.+)$')
 
-    # Parse key=value pairs into a dict per row, then expand into columns
+    # Parse remaining key=value pairs (excluding desc=)
     def parse_kv(s):
-        s = re.sub(r'\s*desc=.+$', '', s)  # strip desc= onwards
+        s = re.sub(r'\s*desc=.+$', '', s)
         return dict(re.findall(r'(\w+)=(\S+)', s))
 
     desc_df = df['description'].apply(parse_kv).apply(pd.Series)
     df = pd.concat([df.drop(columns='description'), desc_df], axis=1)
-    print(df.columns.tolist())
-    print(df['description'].head())  # check what the raw description looks like
-    # Cast float columns
-    for col in ['e_value', 'score', 'bias', 'e_value_best', 'score_best', 'bias_best', 'exp']:
-        df[col] = df[col].astype(float)
+
+    # Cast int columns
     for col in ['reg', 'clu', 'ov', 'env', 'dom', 'rep', 'inc', 'length']:
-        df[col] = df[col].astype(int)
+        if col in df.columns:
+            df[col] = df[col].astype(int)
 
     print(df.head())
     break
