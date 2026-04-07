@@ -65,10 +65,10 @@ for k1,v1 in dfdict.items(): #iterate over genomes
                 orfdict[r["target_name"]].extend([k1,k2])
     print(orfdict)
     for orf, orflist in orfdict.items():
-        
         fna_files = list(Path(cyclostomata+"/"+orflist[-2]).rglob("*.fna"))
         if fna_files == []:
                 fna_files = list(Path(chondrichthyes+"/"+orflist[-2]).rglob("_chunked.fna"))
+    
         
 
 
