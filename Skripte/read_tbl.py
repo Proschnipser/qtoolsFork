@@ -3,6 +3,7 @@ import sys
 from pathlib import Path
 from io import StringIO
 from collections import defaultdict
+import re
 
 COLS = [
     'target_name', 'target_accession', 'query_name', 'query_accession',
