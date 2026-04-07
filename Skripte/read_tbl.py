@@ -34,7 +34,8 @@ for filepath in Path(directory).rglob("*.tbl"):
 
     desc_df = df['description'].apply(parse_kv).apply(pd.Series)
     df = pd.concat([df.drop(columns='description'), desc_df], axis=1)
-
+    print(df.columns.tolist())
+    print(df['description'].head())  # check what the raw description looks like
     # Cast float columns
     for col in ['e_value', 'score', 'bias', 'e_value_best', 'score_best', 'bias_best', 'exp']:
         df[col] = df[col].astype(float)
