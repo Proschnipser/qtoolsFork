@@ -60,7 +60,7 @@ for k1,v1 in dfdict.items(): #iterate over genomes
             print(not r["target_name"] in orfdict or r["e_value"] < orfdict[r["target_name"]][4])
             print(not r["target_name"] in orfdict)
             print(r["e_value"] < orfdict[r["target_name"]][4])
-            if r["length"] > 99 and not r["target_name"] in orfdict or r["e_value"] < orfdict[r["target_name"]][4]:
+            if r["length"] > 99 and (not r["target_name"] in orfdict or r["e_value"] < orfdict[r["target_name"]][4]):
                 print(list(r))
                 orfdict[r["target_name"]]=list(r)
     print(orfdict)
