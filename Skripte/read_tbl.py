@@ -18,6 +18,7 @@ dfdict=defaultdict(dict)
 for filepath in Path(directory).rglob("*.tbl"):
     rows = []
     with open(filepath) as f:
+        print(filepath)
         for line in f:
             if line.startswith('#') or not line.strip():
                 continue
