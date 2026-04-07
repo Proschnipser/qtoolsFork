@@ -46,8 +46,6 @@ for filepath in Path(directory).rglob("*.tbl"):
     for col in ['reg', 'clu', 'ov', 'env', 'dom', 'rep', 'inc', 'length']:
         if col in df.columns:
             df[col] = df[col].astype(int)
-
-    print(df)
     splitname=str(filepath.stem).split("_")
     print(splitname[1], splitname[-1].replace("chunked","").replace("genomic",""))
     dfdict[splitname[1]][''.join(filter(str.isupper,splitname[-1]))]=df
