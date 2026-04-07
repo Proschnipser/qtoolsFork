@@ -18,23 +18,20 @@ for filepath in Path(directory).rglob("*.tbl"):
     with open(filepath) as f:
         content = ''.join(l for l in f if not l.startswith('#'))
 
+    
     df = pd.read_csv(StringIO(content), sep=r'\s+', header=None, names=COLS, usecols=range(19))
 
     
 
-    # Extract full multi-word desc= value (everything after desc= to end of string)
+    # Extract full multi-word desc= value
     df['desc'] = df['description'].str.extract(r'desc=(.+)$')
 
-    # Parse remaining key=value pairs (excluding desc= and everything after)
-    desc_df = (
-        df['description']
-        .str.replace(r'\s*desc=.+$', '', regex=True)
-        .str.extractall(r'(\w+)=(\S+)')
-        .unstack(level=1)
-    )
-    desc_df.columns = desc_df.columns.droplevel(0)
-    desc_df.columns.name = None
+    # Parse key=value pairs into a dict per row, then expand into columns
+    def parse_kv(s):
+        s = re.sub(r'\s*desc=.+$', '', s)  # strip desc= onwards
+        return dict(re.findall(r'(\w+)=(\S+)', s))
 
+    desc_df = df['description'].apply(parse_kv).apply(pd.Series)
     df = pd.concat([df.drop(columns='description'), desc_df], axis=1)
 
     # Cast float columns
