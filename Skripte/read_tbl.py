@@ -39,6 +39,7 @@ for filepath in Path(directory).rglob("*.tbl"):
     desc_df.columns.name = None
 
     df = pd.concat([df.drop(columns='description'), desc_df], axis=1)
+    print(df.head())
     for col in ['e_value', 'score', 'bias', 'e_value_best', 'score_best', 'bias_best', 'exp']:
         df[col] = df[col].astype(float)
     for col in ['reg', 'clu', 'ov', 'env', 'dom', 'rep', 'inc', 'length']:
