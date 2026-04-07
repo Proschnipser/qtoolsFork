@@ -57,8 +57,6 @@ for k1,v1 in dfdict.items(): #iterate over genomes
         for i, r in v2.iterrows():
             if r["e_value"] > 0.05:
                 break
-            print(not r["target_name"] in orfdict or r["e_value"] < orfdict[r["target_name"]][4])
-            print(not r["target_name"] in orfdict)
             if r["length"] > 99 and (not r["target_name"] in orfdict or r["e_value"] < orfdict[r["target_name"]][4]):
                 print(list(r))
                 orfdict[r["target_name"]]=list(r)
