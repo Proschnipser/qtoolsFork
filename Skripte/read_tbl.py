@@ -52,8 +52,11 @@ for filepath in Path(directory).rglob("*.tbl"):
     print(splitname[1], splitname[-1].replace("chunked","").replace("genomic",""))
     dfdict[splitname[1]][''.join(filter(str.isupper,splitname[-1]))]=df
 
+orfdf=pd.DataFrame()
+for k1,v1 in dfdict.items(): #iterate over genomes
+    for k2, v2 in v1.items(): #iterate over protein types
+        for i, r in v2.iterrows():
+            print(i,r)
+            
 
-# for k1,v1 in dfdict.items():
-#     for k2, v2 in v1.items():
-#         for i, r in v2.iterrows():
             
