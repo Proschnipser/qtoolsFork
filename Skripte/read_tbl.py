@@ -52,8 +52,16 @@ for filepath in Path(directory).rglob("*.tbl"):
 
 orfdf=pd.DataFrame()
 for k1,v1 in dfdict.items(): #iterate over genomes
+    orfdict={}
     for k2, v2 in v1.items(): #iterate over protein types
         for i, r in v2.iterrows():
+            print(type(r))
+            if r["e_value"] > 0.05:
+                break
+            if r["length"] > 99: #and e_value < orfdict[r["target_name"]]
+                print(list(r))
+                orfdict[r["target_name"]]=list(r)
+
             print(r)
             
 
