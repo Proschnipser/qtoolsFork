@@ -55,10 +55,10 @@ for k1,v1 in dfdict.items(): #iterate over genomes
     orfdict={}
     for k2, v2 in v1.items(): #iterate over protein types
         for i, r in v2.iterrows():
-            print(type(r))
             if r["e_value"] > 0.05:
                 break
-            print(not r["target_name"] in orfdict or r["e_value"] < orfdict[r["target_name"]][4],not r["target_name"] in orfdict,r["e_value"] < orfdict[r["target_name"]][4])
+            print(not r["target_name"] in orfdict or r["e_value"] < orfdict[r["target_name"]][4])
+            print(not r["target_name"] in orfdict,r["e_value"] < orfdict[r["target_name"]][4])
             if r["length"] > 99 and not r["target_name"] in orfdict or r["e_value"] < orfdict[r["target_name"]][4]:
                 print(list(r))
                 orfdict[r["target_name"]]=list(r)
