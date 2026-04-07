@@ -12,7 +12,8 @@ COLS = [
     'exp', 'reg', 'clu', 'ov', 'env', 'dom', 'rep', 'inc',
     'description'
 ]
-
+cyclostomata="/data/joscha/Downloads/Cyclostomata/ncbi_dataset/data"
+chondrichthyes="/data/joscha/Downloads/Chondrichthyes/ncbi_dataset/data"
 directory="/data/joscha/output/hmmer_hits_long/" #sys.argv[1]
 dfdict=defaultdict(dict)
 for filepath in Path(directory).rglob("*.tbl"):
@@ -46,22 +47,30 @@ for filepath in Path(directory).rglob("*.tbl"):
     for col in ['reg', 'clu', 'ov', 'env', 'dom', 'rep', 'inc', 'length']:
         if col in df.columns:
             df[col] = df[col].astype(int)
-    splitname=str(filepath.stem).split("_")
-    print(splitname[1], splitname[-1].replace("chunked","").replace("genomic",""))
-    dfdict[splitname[1]][''.join(filter(str.isupper,splitname[-1]))]=df
+    splitname=filepath.stem.split("_")
+    print("_".join(splitname[:2]),splitname[-1].replace("chunked","").replace("genomic","") )
+    dfdict["_".join(splitname[:2])][filepath.stem]=df
 
 orfdf=pd.DataFrame()
 for k1,v1 in dfdict.items(): #iterate over genomes
     orfdict={}
     for k2, v2 in v1.items(): #iterate over protein types
+        print(k2)
         for i, r in v2.iterrows():
             if r["e_value"] > 0.05:
                 break
             if r["length"] > 99 and (not r["target_name"] in orfdict or r["e_value"] < orfdict[r["target_name"]][4]):
                 print(list(r))
                 orfdict[r["target_name"]]=list(r)
+                orfdict[r["target_name"]].extend([k1,k2])
     print(orfdict)
-    break
+    for orf, orflist in orfdict.items():
+        
+        fna_files = list(Path(cyclostomata+"/"+orflist[-2]).rglob("*.fna"))
+        if fna_files == []:
+                fna_files = list(Path(chondrichthyes+"/"+orflist[-2]).rglob("_chunked.fna"))
+        
+
 
             
             
