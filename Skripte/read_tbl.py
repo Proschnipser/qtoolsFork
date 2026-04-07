@@ -61,6 +61,7 @@ for k1,v1 in dfdict.items(): #iterate over genomes
                 print(list(r))
                 orfdict[r["target_name"]]=list(r)
     print(orfdict)
+    break
 
             
             
