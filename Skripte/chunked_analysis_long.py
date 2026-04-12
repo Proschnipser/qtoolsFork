@@ -23,9 +23,7 @@ for hitfile in Path(hmmer_hits).rglob("*.tbl"):
     if not hitfile.is_file() or hitfile.stat().st_size ==0:
         ID="_".join(hitfile.stem.split("_")[:2])
         print(ID, cyclostomata+"/"+ID)
-        fna_files = list(Path(cyclostomata+"/"+ID).rglob("*.fna"))
-        if fna_files == []:
-            fna_files = list(Path(chondrichthyes+"/"+ID).rglob("*.fna"))
+        fna_files = list(Path(cyclostomata+"/"+ID).rglob("*.fna")) + list(Path(chondrichthyes+"/"+ID).rglob("*.fna"))
         print(fna_files)
         chunked=Path(str(fna_files[0]).replace(".fna","_chunked.fna"))
         command=f"seqkit sliding -s 240000 -W 270000 {str(fna_files[0])}"
