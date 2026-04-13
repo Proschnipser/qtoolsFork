@@ -7,6 +7,8 @@ from multiprocessing import Pool
 import re
 import os
 import subprocess
+from Bio import SeqIO
+from io import StringIO
 
 def createIndices(fna_file):
     os.system(f"esl-sfetch --index {fna_file}")
@@ -21,10 +23,10 @@ COLS = [
 cyclostomata="/data/joscha/Downloads/Cyclostomata/ncbi_dataset/data"
 chondrichthyes="/data/joscha/Downloads/Chondrichthyes/ncbi_dataset/data"
 signaldir="/data/joscha/output/signal_analysis/"
-fna_files = list(Path(chondrichthyes).rglob("*_chunked.fna"))+list(Path(cyclostomata).rglob("*genomic.fna"))
+fna_files = list(Path(cyclostomata).rglob("*genomic.fna")) +list(Path(chondrichthyes).rglob("*_chunked.fna"))
 print( fna_files)
-# with Pool(processes=max(1, os.cpu_count() - 1)) as pool:
-#     pool.map(createIndices, fna_files)
+with Pool(processes=max(1, os.cpu_count() - 1)) as pool:
+     pool.map(createIndices, fna_files)
 print(fna_files)
 directory="/data/joscha/output/hmmer_hits_long/" #sys.argv[1]
 dfdict=defaultdict(dict)
@@ -75,16 +77,18 @@ for k1,v1 in dfdict.items(): #iterate over genomes
     print(orfdict)
     for orf, orflist in orfdict.items():
         fna_files = list(Path(cyclostomata+"/"+orflist[0]+"/").rglob("*.fna"))+ list(Path(chondrichthyes+"/"+orflist[0]+"/").rglob("*_chunked.fna"))
-        #os.system(f"esl-sfetch --index {fna_files[0]}")
-        sequence= subprocess.getoutput(f"esl-sfetch -c {orflist[-3]} {fna_files[0]} {orflist[-4]} | esl-translate -")
-        
-        fastafile=signaldir+orflist[1]+".fasta"
-        with open(fastafile, "w") as f:
-            f.write(sequence)
-        print(orflist[1])
-        os.system(f"signalp6 --fastafile {fastafile} --output_dir {signaldir} --organism eukarya --mode slow-sequential")
-        cutted_sequence= ""
-        hitsdf.loc[len(hitsdf)] = orflist+ [sequence, cutted_sequence]
+        if(fna_files != []):
+            print(fna_files)
+            #os.system(f"esl-sfetch --index {fna_files[0]}")
+            sequence= subprocess.getoutput(f"esl-sfetch -c {orflist[-3]} {fna_files[0]} {orflist[-4]} | esl-translate -")
+            
+            records = (rec for rec in SeqIO.parse(StringIO(sequence), "fasta") if len(rec.seq) > 100)
+            fastafile=signaldir+orflist[1]+".fasta"
+            count = SeqIO.write(records, fastafile, "fasta")
+            print(orflist[1])
+            os.system(f"signalp6 --fastafile {fastafile} --output_dir {signaldir}/{orflist[1]} --organism eukarya --mode slow-sequential --model_dir /data/joscha/Downloads/signalp-6.0i.slow_sequential/signalp6_slow_sequential/signalp-6-package/models")
+            cutted_sequence= ""
+            hitsdf.loc[len(hitsdf)] = orflist+ [sequence, cutted_sequence]
 
 csv_out="/data/joscha/Data/hmmer_results.csv"
 print(csv_out)
