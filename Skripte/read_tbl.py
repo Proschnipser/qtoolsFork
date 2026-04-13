@@ -20,6 +20,7 @@ COLS = [
 ]
 cyclostomata="/data/joscha/Downloads/Cyclostomata/ncbi_dataset/data"
 chondrichthyes="/data/joscha/Downloads/Chondrichthyes/ncbi_dataset/data"
+signaldir="/data/joscha/output/signal_analysis/"
 fna_files = list(Path(chondrichthyes).rglob("*_chunked.fna"))+list(Path(cyclostomata).rglob("*genomic.fna"))
 print( fna_files)
 with Pool(processes=max(1, os.cpu_count() - 1)) as pool:
@@ -59,7 +60,7 @@ for filepath in Path(directory).rglob("*.tbl"):
     splitname=filepath.stem.split("_")
     print("_".join(splitname[:2]),splitname[-1].replace("chunked","").replace("genomic","") )
     dfdict["_".join(splitname[:2])][filepath.stem]=df
-newCOLS= ["name", "full_name"]+ list(df.columns.values)+["sequence"]
+newCOLS= ["name", "full_name"]+ list(df.columns.values)+["sequence","cut sequence"]
 hitsdf=pd.DataFrame(columns=newCOLS)
 for k1,v1 in dfdict.items(): #iterate over genomes
     orfdict={}
@@ -76,7 +77,15 @@ for k1,v1 in dfdict.items(): #iterate over genomes
         fna_files = list(Path(cyclostomata+"/"+orflist[0]+"/").rglob("*.fna"))+ list(Path(chondrichthyes+"/"+orflist[0]+"/").rglob("*_chunked.fna"))
         #os.system(f"esl-sfetch --index {fna_files[0]}")
         sequence= subprocess.getoutput(f"esl-sfetch -c {orflist[-3]} {fna_files[0]} {orflist[-4]} | esl-translate -")
-        hitsdf.loc[len(hitsdf)] = orflist+ [sequence]
+        
+        fastafile=signaldir+orflist[1]+".fasta"
+        with open(fastafile, "w") as f:
+            f.write(sequence)
+        print(orflist[1])
+        os.system(f"signalp6 --fastafile {fastafile} --output_dir {signaldir} --organism eukarya")
+        cutted_sequence= ""
+        hitsdf.loc[len(hitsdf)] = orflist+ [sequence, cutted_sequence]
+
 csv_out="/data/joscha/Data/hmmer_results.csv"
 print(csv_out)
 print(hitsdf)
