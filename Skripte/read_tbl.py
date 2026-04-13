@@ -82,7 +82,7 @@ for k1,v1 in dfdict.items(): #iterate over genomes
         with open(fastafile, "w") as f:
             f.write(sequence)
         print(orflist[1])
-        os.system(f"signalp6 --fastafile {fastafile} --output_dir {signaldir} --organism eukarya")
+        os.system(f"signalp6 --fastafile {fastafile} --output_dir {signaldir} --organism eukarya --mode slow")
         cutted_sequence= ""
         hitsdf.loc[len(hitsdf)] = orflist+ [sequence, cutted_sequence]
 
