@@ -23,8 +23,8 @@ chondrichthyes="/data/joscha/Downloads/Chondrichthyes/ncbi_dataset/data"
 signaldir="/data/joscha/output/signal_analysis/"
 fna_files = list(Path(chondrichthyes).rglob("*_chunked.fna"))+list(Path(cyclostomata).rglob("*genomic.fna"))
 print( fna_files)
-with Pool(processes=max(1, os.cpu_count() - 1)) as pool:
-    pool.map(createIndices, fna_files)
+# with Pool(processes=max(1, os.cpu_count() - 1)) as pool:
+#     pool.map(createIndices, fna_files)
 print(fna_files)
 directory="/data/joscha/output/hmmer_hits_long/" #sys.argv[1]
 dfdict=defaultdict(dict)
