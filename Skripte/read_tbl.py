@@ -62,12 +62,11 @@ for filepath in Path(directory).rglob("*.tbl"):
     splitname=filepath.stem.split("_")
     print("_".join(splitname[:2]),splitname[-1].replace("chunked","").replace("genomic","") )
     dfdict["_".join(splitname[:2])][filepath.stem]=df
-newCOLS= ["name", "full_name"]+ list(df.columns.values)+["sequence","Sequence cutted", "Prediction","OTHER", "SP(Sec/SPI)"]
+newCOLS= ["name", "full_name"]+ list(df.columns.values)+["sequence","Sequence cutted"]
 hitsdf=pd.DataFrame(columns=newCOLS)
 for k1,v1 in dfdict.items(): #iterate over genomes
     orfdict={}
     for k2, v2 in v1.items(): #iterate over protein types
-        print(k2)
         for i, r in v2.iterrows():
             #print(orfdict)
             if r["e_value"] > 0.05:
@@ -99,7 +98,7 @@ for k1,v1 in dfdict.items(): #iterate over genomes
             if Path(fastafile).stat().st_size ==0:
                 print("Fastafile empty")
             else:
-                #os.system(f"signalp6 --fastafile {fastafile} --output_dir {signaldir}{orflist[1]} --organism eukarya --mode slow-sequential --model_dir /data/joscha/Downloads/signalp-6.0i.slow_sequential/signalp6_slow_sequential/signalp-6-package/models")
+                os.system(f"signalp6 --fastafile {fastafile} --output_dir {signaldir}{orflist[1]} --organism eukarya --mode slow-sequential --model_dir /data/joscha/Downloads/signalp-6.0i.slow_sequential/signalp6_slow_sequential/signalp-6-package/models")
                 resultdf= pd.read_csv(
                     f"{signaldir}{orflist[1]}/prediction_results.txt",
                     sep="\t",
@@ -110,17 +109,10 @@ for k1,v1 in dfdict.items(): #iterate over genomes
                 sp_only = resultdf[resultdf["Prediction"] == "SP"]
                 sp_only["ID_short"] = sp_only["ID"].str.extract(r"^(orf\d+)")
                 if not sp_only.empty:
-                    print("Sp_only:",sp_only)
-                    best_sp_row = sp_only.loc[sp_only["SP(Sec/SPI)"].idxmax()]
-                    cs_position = best_sp_row["CS Position"]
-                    start, end = re.findall(r"\d+", cs_position)[:2]
-                    start = int(start)
-                    end = int(end)
-                    print(cs_position,start, end)
-                    print(records.keys())
-                    cutted_sequence= records[sp_only["ID_short"][0]].seq[start:]
+                    for record in SeqIO.parse(f"{signaldir}{orflist[1]}/processed_entries.fasta", "fasta"):   
+                        cutted_sequence= str(record.seq)
                     print(cutted_sequence)
-            hitsdf.loc[len(hitsdf)] = orflist+ [sequence, cutted_sequence,Prediction,OTHER, SP]
+            hitsdf.loc[len(hitsdf)] = orflist+ [sequence, cutted_sequence]
 
 csv_out="/data/joscha/Data/hmmer_results.csv"
 print(csv_out)
