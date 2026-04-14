@@ -25,8 +25,8 @@ chondrichthyes="/data/joscha/Downloads/Chondrichthyes/ncbi_dataset/data"
 signaldir="/data/joscha/output/signal_analysis/"
 fna_files = list(Path(cyclostomata).rglob("*genomic.fna")) +list(Path(chondrichthyes).rglob("*_chunked.fna"))
 print( fna_files)
-with Pool(processes=max(1, os.cpu_count() - 1)) as pool:
-     pool.map(createIndices, fna_files)
+# with Pool(processes=max(1, os.cpu_count() - 1)) as pool:
+#      pool.map(createIndices, fna_files)
 print(fna_files)
 directory="/data/joscha/output/hmmer_hits_long/" #sys.argv[1]
 dfdict=defaultdict(dict)
@@ -62,33 +62,65 @@ for filepath in Path(directory).rglob("*.tbl"):
     splitname=filepath.stem.split("_")
     print("_".join(splitname[:2]),splitname[-1].replace("chunked","").replace("genomic","") )
     dfdict["_".join(splitname[:2])][filepath.stem]=df
-newCOLS= ["name", "full_name"]+ list(df.columns.values)+["sequence","cut sequence"]
+newCOLS= ["name", "full_name"]+ list(df.columns.values)+["sequence","Sequence cutted", "Prediction","OTHER", "SP(Sec/SPI)"]
 hitsdf=pd.DataFrame(columns=newCOLS)
 for k1,v1 in dfdict.items(): #iterate over genomes
     orfdict={}
     for k2, v2 in v1.items(): #iterate over protein types
         print(k2)
         for i, r in v2.iterrows():
-            print(orfdict)
+            #print(orfdict)
             if r["e_value"] > 0.05:
                 break
             if r["length"] > 99 and (not r["target_name"] in orfdict or r["e_value"] < orfdict[r["target_name"]][6]):
                 orfdict[r["target_name"]]=[k1,k2] + list(r)
-    print(orfdict)
+    #print(orfdict)
     for orf, orflist in orfdict.items():
         fna_files = list(Path(cyclostomata+"/"+orflist[0]+"/").rglob("*.fna"))+ list(Path(chondrichthyes+"/"+orflist[0]+"/").rglob("*_chunked.fna"))
         if(fna_files != []):
-            print(fna_files)
             #os.system(f"esl-sfetch --index {fna_files[0]}")
-            sequence= subprocess.getoutput(f"esl-sfetch -c {orflist[-3]} {fna_files[0]} {orflist[-4]} | esl-translate -")
-            
-            records = (rec for rec in SeqIO.parse(StringIO(sequence), "fasta") if len(rec.seq) > 100)
+            #sequence= subprocess.getoutput(f"esl-sfetch -c {orflist[-3]} {fna_files[0]} {orflist[-4]} | esl-translate -")
+            #print(sequence)
+
             fastafile=signaldir+orflist[1]+".fasta"
-            count = SeqIO.write(records, fastafile, "fasta")
+            if Path(fastafile).is_file():
+                sequence = Path(fastafile).read_text()
+                records = [rec for rec in SeqIO.parse(StringIO(sequence), "fasta") if len(rec.seq) > 100]
+            else:
+                sequence= subprocess.getoutput(f"esl-sfetch -c {orflist[-3]} {fna_files[0]} {orflist[-4]} | esl-translate -")
+                records = [rec for rec in SeqIO.parse(StringIO(sequence), "fasta") if len(rec.seq) > 100]
+                SeqIO.write(records,fastafile, "fasta")
+            
+            
+            records = SeqIO.to_dict(records)
             print(orflist[1])
-            os.system(f"signalp6 --fastafile {fastafile} --output_dir {signaldir}/{orflist[1]} --organism eukarya --mode slow-sequential --model_dir /data/joscha/Downloads/signalp-6.0i.slow_sequential/signalp6_slow_sequential/signalp-6-package/models")
-            cutted_sequence= ""
-            hitsdf.loc[len(hitsdf)] = orflist+ [sequence, cutted_sequence]
+            cutted_sequence=""
+            Prediction,OTHER, SP="","",""
+            if Path(fastafile).stat().st_size ==0:
+                print("Fastafile empty")
+            else:
+                #os.system(f"signalp6 --fastafile {fastafile} --output_dir {signaldir}{orflist[1]} --organism eukarya --mode slow-sequential --model_dir /data/joscha/Downloads/signalp-6.0i.slow_sequential/signalp6_slow_sequential/signalp-6-package/models")
+                resultdf= pd.read_csv(
+                    f"{signaldir}{orflist[1]}/prediction_results.txt",
+                    sep="\t",
+                    comment="#",
+                    header=None,
+                    names=["ID", "Prediction", "OTHER", "SP(Sec/SPI)", "CS Position"]
+                )
+                sp_only = resultdf[resultdf["Prediction"] == "SP"]
+                sp_only["ID_short"] = sp_only["ID"].str.extract(r"^(orf\d+)")
+                if not sp_only.empty:
+                    print("Sp_only:",sp_only)
+                    best_sp_row = sp_only.loc[sp_only["SP(Sec/SPI)"].idxmax()]
+                    cs_position = best_sp_row["CS Position"]
+                    start, end = re.findall(r"\d+", cs_position)[:2]
+                    start = int(start)
+                    end = int(end)
+                    print(cs_position,start, end)
+                    print(records.keys())
+                    cutted_sequence= records[sp_only["ID_short"][0]].seq[start:]
+                    print(cutted_sequence)
+            hitsdf.loc[len(hitsdf)] = orflist+ [sequence, cutted_sequence,Prediction,OTHER, SP]
 
 csv_out="/data/joscha/Data/hmmer_results.csv"
 print(csv_out)
