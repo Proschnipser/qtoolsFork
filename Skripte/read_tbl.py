@@ -12,7 +12,10 @@ from io import StringIO
 
 def createIndices(fna_file):
     os.system(f"esl-sfetch --index {fna_file}")
-
+cyclostomata="/data/joscha/Downloads/Cyclostomata/ncbi_dataset/data"
+chondrichthyes="/data/joscha/Downloads/Chondrichthyes/ncbi_dataset/data"
+signaldir="/data/joscha/output/signal_analysis/"
+fna_files = list(Path(cyclostomata).rglob("*genomic.fna")) +list(Path(chondrichthyes).rglob("*_chunked.fna"))
 COLS = [
     'target_name', 'target_accession', 'query_name', 'query_accession',
     'e_value', 'score', 'bias',
@@ -20,10 +23,7 @@ COLS = [
     'exp', 'reg', 'clu', 'ov', 'env', 'dom', 'rep', 'inc',
     'description'
 ]
-cyclostomata="/data/joscha/Downloads/Cyclostomata/ncbi_dataset/data"
-chondrichthyes="/data/joscha/Downloads/Chondrichthyes/ncbi_dataset/data"
-signaldir="/data/joscha/output/signal_analysis/"
-fna_files = list(Path(cyclostomata).rglob("*genomic.fna")) +list(Path(chondrichthyes).rglob("*_chunked.fna"))
+
 print( fna_files)
 # with Pool(processes=max(1, os.cpu_count() - 1)) as pool:
 #      pool.map(createIndices, fna_files)
@@ -98,7 +98,7 @@ for k1,v1 in dfdict.items(): #iterate over genomes
             if Path(fastafile).stat().st_size ==0:
                 print("Fastafile empty")
             else:
-                os.system(f"signalp6 --fastafile {fastafile} --output_dir {signaldir}{orflist[1]} --organism eukarya --mode slow-sequential --model_dir /data/joscha/Downloads/signalp-6.0i.slow_sequential/signalp6_slow_sequential/signalp-6-package/models")
+                #os.system(f"signalp6 --fastafile {fastafile} --output_dir {signaldir}{orflist[1]} --organism eukarya --mode slow-sequential --model_dir /data/joscha/Downloads/signalp-6.0i.slow_sequential/signalp6_slow_sequential/signalp-6-package/models")
                 resultdf= pd.read_csv(
                     f"{signaldir}{orflist[1]}/prediction_results.txt",
                     sep="\t",
@@ -106,12 +106,18 @@ for k1,v1 in dfdict.items(): #iterate over genomes
                     header=None,
                     names=["ID", "Prediction", "OTHER", "SP(Sec/SPI)", "CS Position"]
                 )
-                sp_only = resultdf[resultdf["Prediction"] == "SP"]
+                sp_only = resultdf[resultdf["Prediction"] == "SP"].copy()
                 sp_only["ID_short"] = sp_only["ID"].str.extract(r"^(orf\d+)")
                 if not sp_only.empty:
-                    for record in SeqIO.parse(f"{signaldir}{orflist[1]}/processed_entries.fasta", "fasta"):   
-                        cutted_sequence= str(record.seq)
-                    print(cutted_sequence)
+                    iterator= SeqIO.parse(f"{signaldir}{orflist[1]}/processed_entries.fasta", "fasta")
+                    cutted_sequence= str(next(iterator).seq)
+                    try:
+                        print(cutted_sequence, next(iterator).seq)
+                        sys.exit("multiple sequences")
+                    except StopIteration:
+                        print()
+
+
             hitsdf.loc[len(hitsdf)] = orflist+ [sequence, cutted_sequence]
 
 csv_out="/data/joscha/Data/hmmer_results.csv"

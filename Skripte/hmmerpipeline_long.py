@@ -22,6 +22,7 @@ def run_hmmsearch(args):
     std_out=hits_out.replace(".tbl", ".out")
     print(hits_out)
     if not Path(hits_out).is_file() or Path(hits_out).stat().st_size ==0:
+        print(f"esl-translate {file} | hmmsearch --tblout {hits_out} {model} - > {std_out}")
         os.system(f"esl-translate {file} | hmmsearch --tblout {hits_out} {model} - > {std_out}")
         print("Finished:", hits_out)
 
