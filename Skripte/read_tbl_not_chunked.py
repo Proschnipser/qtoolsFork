@@ -1,0 +1,154 @@
+import pandas as pd
+import sys
+from pathlib import Path
+from io import StringIO
+from collections import defaultdict
+from multiprocessing import Pool
+import re
+import os
+import subprocess
+from Bio import SeqIO
+from io import StringIO
+
+global cyclostomata
+cyclostomata = "/data/joscha/Downloads/Cyclostomata/ncbi_dataset/data"
+global chondrichthyes
+chondrichthyes = "/data/joscha/Downloads/Chondrichthyes/ncbi_dataset/data"
+global signaldir
+signaldir="/data/joscha/output/signal_analysis_TANGO1/"
+
+
+def createIndices(fna_file):
+    os.system(f"esl-sfetch --index {fna_file}")
+
+def signalp6_parallel(args):
+    orflist,fastafile, fna_files=args
+    cutted_sequence=""
+    
+    sequence = Path(fastafile).read_text()
+    records = [rec for rec in SeqIO.parse(StringIO(sequence), "fasta")]
+        
+    records = SeqIO.to_dict(records)
+    print(orflist[1])
+    
+    Prediction,OTHER, SP="","",""
+    if Path(fastafile).stat().st_size ==0:
+        print("Fastafile empty", orflist[1])
+    else:
+        os.system(f"signalp6 --fastafile {fastafile} --output_dir {signaldir}{orflist[1]}{orflist[-4]} --organism eukarya --mode slow-sequential --model_dir /data/joscha/Downloads/signalp-6.0i.slow_sequential/signalp6_slow_sequential/signalp-6-package/models")
+        resultdf= pd.read_csv(
+            f"{signaldir}{orflist[1]}{orflist[-4]}/prediction_results.txt",
+            sep="\t",
+            comment="#",
+            header=None,
+            names=["ID", "Prediction", "OTHER", "SP(Sec/SPI)", "CS Position"]
+        )
+        sp_only = resultdf[resultdf["Prediction"] == "SP"].copy()
+        sp_only["ID_short"] = sp_only["ID"].str.extract(r"^(orf\d+)")
+        
+        if not sp_only.empty:
+            iterator= SeqIO.parse(f"{signaldir}{orflist[1]}{orflist[-4]}/processed_entries.fasta", "fasta")
+            cutted_sequence= str(next(iterator).seq)[:184]
+            try:
+                print(cutted_sequence, next(iterator).seq)
+                sys.exit(f"Multiple sequences cutted: {orflist[1]}" )
+            except StopIteration:
+                print()
+    return orflist,sequence, cutted_sequence
+
+fna_files = list(Path(cyclostomata).rglob("*genomic.fna")) +list(Path(chondrichthyes).rglob("*genomic.fna"))
+COLS = [
+    'target_name', 'target_accession', 'query_name', 'query_accession',
+    'e_value', 'score', 'bias',
+    'e_value_best', 'score_best', 'bias_best',
+    'exp', 'reg', 'clu', 'ov', 'env', 'dom', 'rep', 'inc',
+    'description'
+]
+
+print( fna_files)
+# with Pool(processes=max(1, os.cpu_count() - 1)) as pool:
+#      pool.map(createIndices, fna_files)
+print(fna_files)
+directory="/data/joscha/output/hmmer_hits_long/" #sys.argv[1]
+dfdict=defaultdict(dict)
+for filepath in Path(directory).rglob("*.tbl"):
+    rows = []
+    with open(filepath) as f:
+        print(filepath)
+        for line in f:
+            if line.startswith('#') or not line.strip():
+                continue
+            parts = line.split()
+            rows.append(parts[:18] + [' '.join(parts[18:])])
+
+    df = pd.DataFrame(rows, columns=COLS)
+
+    # Extract full multi-word desc= value
+    df['desc'] = df['description'].str.extract(r'desc=(.+)$')
+
+    # Parse remaining key=value pairs (excluding desc=)
+    def parse_kv(s):
+        s = re.sub(r'\s*desc=.+$', '', s)
+        return dict(re.findall(r'(\w+)=(\S+)', s))
+
+    desc_df = df['description'].apply(parse_kv).apply(pd.Series)
+    df = pd.concat([df.drop(columns='description'), desc_df], axis=1)
+
+     # Cast float columns
+    for col in ['e_value', 'score', 'bias', 'e_value_best', 'score_best', 'bias_best', 'exp']:
+        df[col] = df[col].astype(float)
+    for col in ['reg', 'clu', 'ov', 'env', 'dom', 'rep', 'inc', 'length']:
+        if col in df.columns:
+            df[col] = df[col].astype(int)
+    splitname=filepath.stem.split("_")
+    print("_".join(splitname[:2]),splitname[-1].replace("chunked","").replace("genomic","") )
+    if not "chunked" in filepath.stem:
+        dfdict["_".join(splitname[:2])][filepath.stem]=df
+newCOLS= ["name", "full_name"]+ list(df.columns.values)+["sequence","Sequence cutted"]
+hitsdf=pd.DataFrame(columns=newCOLS)
+for k1,v1 in dfdict.items(): #iterate over genomes
+    orfdict={}
+    for k2, v2 in v1.items(): #iterate over protein types
+        print(k2,v2)
+        for i, r in v2.iterrows():
+            #print(orfdict)
+            if r["e_value"] > 0.05:
+                break
+            if r["length"] > 99 and (not r["target_name"] in orfdict or r["e_value"] < orfdict[r["target_name"]][6]):
+                orfdict[r["target_name"]]=[k1,k2] + list(r)
+    tasks=[]
+    returns=[]
+    for orf, orflist in orfdict.items():
+        fna_files = list(Path(cyclostomata+"/"+orflist[0]+"/").rglob("*genomic.fna"))+ list(Path(chondrichthyes+"/"+orflist[0]+"/").rglob("*genomic.fna"))
+        if(fna_files != []):
+            #os.system(f"esl-sfetch --index {fna_files[0]}")
+            #sequence= subprocess.getoutput(f"esl-sfetch -c {orflist[-3]} {fna_files[0]} {orflist[-4]} | esl-translate -")
+            #print(sequence)
+            fastafile=signaldir+orflist[1]+orflist[-3]+orflist[-4]+".fasta"
+            if not Path(fastafile).is_file():
+                sequence= subprocess.getoutput(f"esl-sfetch -c {orflist[-3]} {fna_files[0]} {orflist[-4]} | esl-translate -")
+                print(f"esl-sfetch -c {orflist[-3]} {fna_files[0]} {orflist[-4]} | esl-translate -")
+                print(sequence)
+                records = [rec for rec in SeqIO.parse(StringIO(sequence), "fasta") if len(rec.seq) > 100]
+                SeqIO.write(records,fastafile, "fasta")
+            
+            tasks.append((orflist, fastafile, fna_files))
+            returns.append(signalp6_parallel((orflist, fastafile, fna_files)))
+    # with Pool(processes=max(1, len(tasks))) as pool:
+    #     returns=pool.map(signalp6_parallel,tasks)
+    for orflist, sequence, cutted_sequence in returns:
+        hitsdf.loc[len(hitsdf)] = orflist+ [sequence, cutted_sequence]
+
+csv_out="/data/joscha/Data/hmmer_results_not_chunked_TANGO1.csv"
+print(csv_out)
+print(hitsdf)
+hitsdf.to_csv(csv_out, index=False)
+
+    
+        
+
+
+            
+            
+
+            

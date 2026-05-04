@@ -83,6 +83,8 @@ def get_quartets_from_tree(tree):
     # for each internal node   
     for clade in tree.get_nonterminals():
         # choose an inner group 
+        print(clade)
+        #print(clade.clades)
         for i in clade.clades: 
             ingroup = i.get_terminals()
             ingroup = [x.name for x in ingroup] 

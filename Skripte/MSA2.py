@@ -36,6 +36,7 @@ fasta_out=os.path.splitext(filepath)[0]+"_names.fasta"
 threshold_length=100
 seqrecords=extract_seqrecords(df, threshold_length)
 SeqIO.write(seqrecords, fasta_out, "fasta")
+
 sample_size=len(seqrecords)
 aln_path=fasta_out.replace(".fasta",f"_thresh{threshold_length}aa_{sample_size}.fa")
 aln_nex= aln_path.replace(".fa",".nex")

@@ -4,17 +4,17 @@ from pathlib import Path
 from multiprocessing import Pool
 import itertools
 
-hmmer_models=Path("/data/joscha/output/hmmer_models_long")
+hmmer_models=Path("/data/joscha/output/hmmer_models_long/all_TANGO1_onlySP_dedup_reduced_long_names.hmm")
 # Types=["TANGO1","MIA","TALI","OTOR"]
 # for protein in Types:
 #     name=f"{hmmer_models}/{protein}strict_dedup_reduced_long_names.hmm /data/joscha/Data/{protein}strict_dedup_reduced_long_names.sto "
     
 #     print(name)
 #     os.system(f"hmmbuild {name}")
-directory=sys.argv[1] #/bioinf/data/user/joscha/Downloads/Cyclostomata/ncbi_dataset/ncbi_dataset/data
-hmmer_hits="/data/joscha/output/hmmer_hits_long"
+directory=sys.argv[1] #/bioinf/all_TANGO1_onlySP_dedup_reduced_long_names.hmm
+hmmer_hits="/data/joscha/output/hmmer_hits_long_TANGO1"
 fna_files = list(Path(directory).rglob("*genomic.fna"))
-
+print(fna_files)
 def run_hmmsearch(args):
     hmmer_hits,file, model=args
     modelname=model.stem.split("strict")[0]
@@ -34,9 +34,7 @@ for file in fna_files:
     #command=f"seqkit sliding -s 240000 -W 270000 {str(file)} > {chunked}"
     #os.system(command)
     #commands.append(command)
-    for model in hmmer_models.iterdir():
-        if model.is_file():
-            tasks.append((hmmer_hits, file,model))
+    tasks.append((hmmer_hits, file,hmmer_models))
 
 # with Pool(processes=max(1, os.cpu_count() - 1)) as pool:
 #     pool.map(os.system, commands)

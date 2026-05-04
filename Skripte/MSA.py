@@ -18,7 +18,7 @@ def extract_seqrecords(df, threshold_length):
     """
     seqrecords=[]
     for i,r in df.iterrows(): 
-        seq=Seq(r["Sequence cutted"])
+        seq=Seq(r["Sequence"])
         print(len(seq))
         if threshold_length <= len(seq):
             seqid=str(r["no."])+"_"+r["AC"].replace(";", "").replace(" ", "_")
@@ -31,7 +31,7 @@ def extract_seqrecords(df, threshold_length):
 filepath=sys.argv[1]
 df=pd.read_csv(filepath)
 #df=pd.read_csv("/data/joscha/Data/TANGO1onlySP_dedup.csv")
-fasta_out=os.path.splitext(filepath)[0]+"_names.fasta"
+fasta_out=os.path.splitext(filepath)[0]+"_long_names.fasta"
 threshold_length=100
 seqrecords=extract_seqrecords(df, threshold_length)
 SeqIO.write(seqrecords, fasta_out, "fasta")
