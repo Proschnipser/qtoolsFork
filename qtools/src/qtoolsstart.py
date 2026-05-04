@@ -10,7 +10,7 @@ from scipy.spatial import distance_matrix
 from src.qtools.quartettroutines import siamesemodel, quartetmodel
 from src.qtools.lossfunctions import  siamloss_siamnet, Xsq_SiamReg, siamloss, eloss
 
-#from tensorflow.keras.optimizers import Nadam
+from tensorflow.keras.optimizers import Nadam
 
 ref_tree = Phylo.read("/data/joscha/Downloads/SRw3UZCwUl830gEIOhHRkw_newick.tree","newick")
 
