@@ -31,7 +31,7 @@ distances = dp.get_edgelength(tree, train_names)
 
 batch_size=1
 epochs = 100
-
+mode='quartet'
 
 # # # if running as siamese model 
 # # if mode == 'siamese':
