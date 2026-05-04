@@ -7,8 +7,8 @@ import pandas as pd
 from random import sample
 import numpy as np
 from scipy.spatial import distance_matrix
-from src.qtools.quartettroutines import siamesemodel, quartetmodel
-from src.qtools.lossfunctions import  siamloss_siamnet, Xsq_SiamReg, siamloss, eloss
+from qtools.quartettroutines import siamesemodel, quartetmodel
+from qtools.lossfunctions import  siamloss_siamnet, Xsq_SiamReg, siamloss, eloss
 
 from tensorflow.keras.optimizers import Nadam
 
