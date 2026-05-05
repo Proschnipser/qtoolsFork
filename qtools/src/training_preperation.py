@@ -8,7 +8,6 @@ treefile= "/data/joscha/Downloads/SRw3UZCwUl830gEIOhHRkw_newick.tree"
 ref_tree = dp.read_tree(treefile)
 outfile_prefix = '/data/joscha/output/qtools/'+ str(Path(treefile).stem).replace(".tree","")+"/"
 
-
 Path(outfile_prefix).mkdir(parents=True, exist_ok=True)
 
 # prepare names of species used for testing

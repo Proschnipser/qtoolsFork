@@ -1,45 +1,45 @@
 #!/usr/bin/env python3
-from Bio import Phylo
-import qtools as qt
-import qtools.data_prepper as dp
-import itertools
-import pandas as pd
-from random import sample
-import numpy as np
-from scipy.spatial import distance_matrix
-from qtools.quartettroutines import siamesemodel, quartetmodel
-from qtools.lossfunctions import  siamloss_siamnet, Xsq_SiamReg, siamloss, eloss
+# -*- coding: utf-8 -*-
 
+
+import pandas as pd
+import numpy as np
 from tensorflow.keras.optimizers import Nadam
 
-ref_tree = Phylo.read("/data/joscha/Downloads/SRw3UZCwUl830gEIOhHRkw_newick.tree","newick")
+import qtools as qt
+from qtools.lossfunctions import  siamloss_siamnet, Xsq_SiamReg, siamloss, eloss
+from qtools.quartettroutines import siamesemodel, quartetmodel
+from qtools.data_tracking import metadata, mutationscheme, Tracking
 
-# prepare names of species used for testing
-train_names = sample([leaf.name for leaf in ref_tree.get_terminals()],10)
-
-
-print(train_names)
-# prune the reference tree to names from testing and write to file 
-tree = dp.prune_tree(ref_tree, train_names)
-
-minibatches= dp.get_quartets_from_tree(tree)
-print(minibatches)
-siamesebatches = itertools.combinations(train_names, 2)
-siamesebatches = pd.DataFrame(siamesebatches)
-
-distances = dp.get_edgelength(tree, train_names)
+treefile= "/data/joscha/Downloads/SRw3UZCwUl830gEIOhHRkw_newick.tree"
+outfile_prefix = '/data/joscha/output/qtools/'+ str(Path(treefile).stem).replace(".tree","")+"/"
 
 batch_size=1
 epochs = 100
 mode='quartet'
 
-# # # if running as siamese model 
-# # if mode == 'siamese':
-# #     Multimodel = siamesemodel
-# #     minibatch_file = minibatches_file_siamese
-# #     sigma = 'nan'
-# #     loss_function = siamloss_siamnet
-# #     metrics = None
+# file with training sequences 
+vector_file = ""
+
+
+# file with edge length distance matrix 
+edge_distance = outfile_prefix + 'patristic.csv'
+
+# file with siamese minibatches 
+minibatches_siamese = outfile_prefix + 'siamesebatches.csv' 
+
+
+# file with quartet minibatches 
+minibatches_quartet = outfile_prefix + 'minibatches.csv'
+
+
+# if running as siamese model 
+if mode == 'siamese':
+    Multimodel = siamesemodel
+    minibatch_file = minibatches_file_siamese
+    sigma = 'nan'
+    loss_function = siamloss_siamnet
+    metrics = None
 
 # if running as quartet model, with or without siamese regulation
 if mode == 'quartet':
@@ -48,3 +48,31 @@ if mode == 'quartet':
     sigma = 0.1 
     loss_function = Xsq_SiamReg(sigma)
     metrics = [eloss, siamloss] 
+
+data = pd.read_csv(vector_file)
+data = qt.qdata(data)
+
+
+
+
+
+
+for e in range(epochs):
+	# prepare training batches
+    batches = data.batchmaker(minibatches, batch_size, edge_distance) 
+           
+    # train quartetnet (or siamesenet)
+    multimodel.fit(batches, batch_size = batch_size)         
+
+    # evaluate epoche
+    losses = multimodel.history.history
+    
+    # calculate matrix with euclidean distances
+    prediction = multimodel.predict(x_encoded)
+    matrix_i = multimodel.get_distance_matrix(prediction)
+    
+    # calculate quartet scores (check how many quartets are in right split)
+    scores = qt.get_qscores(matrix_i, x_species, scoring_batches)
+    
+    # make splitstree diagram from distance matrix
+    qt.matrix2nexus(matrix=matrix_i, taxa=x_species, nexusfile='filename.nex', plot_now=True)   
