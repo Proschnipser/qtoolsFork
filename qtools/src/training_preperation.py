@@ -12,7 +12,7 @@ Path(outfile_prefix).mkdir(parents=True, exist_ok=True)
 
 # prepare names of species used for testing
 train_names = sample([leaf.name for leaf in ref_tree.get_terminals()],10)
-
+#_(\d+)_
 
 print(train_names)
 # prune the reference tree to names from testing and write to file 
