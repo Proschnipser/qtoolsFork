@@ -5,7 +5,7 @@ from pathlib import Path
 from random import sample
 
 treefile= "/data/joscha/Downloads/SRw3UZCwUl830gEIOhHRkw_newick.tree"
-ref_tree = dp.read_tree(treefile,"newick")
+ref_tree = dp.read_tree(treefile)
 outfile_prefix = '/data/joscha/output/qtools'+ str(Path(treefile).basename).replace(".tree","")+"/"
 
 
