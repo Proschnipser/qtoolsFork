@@ -5,7 +5,6 @@
 import pandas as pd
 import numpy as np
 from tensorflow.keras.optimizers import Nadam
-
 import qtools as qt
 from qtools.lossfunctions import  siamloss_siamnet, Xsq_SiamReg, siamloss, eloss
 from qtools.quartettroutines import siamesemodel, quartetmodel
