@@ -36,7 +36,7 @@ minibatches_quartet = outfile_prefix + 'minibatches.csv'
 # if running as siamese model 
 if mode == 'siamese':
     Multimodel = siamesemodel
-    minibatch_file = minibatches_file_siamese
+    minibatch_file = minibatches_siamese
     sigma = 'nan'
     loss_function = siamloss_siamnet
     metrics = None
@@ -44,7 +44,7 @@ if mode == 'siamese':
 # if running as quartet model, with or without siamese regulation
 if mode == 'quartet':
     Multimodel = quartetmodel
-    minibatch_file = minibatches_file_quartet 
+    minibatch_file = minibatches_quartet
     sigma = 0.1 
     loss_function = Xsq_SiamReg(sigma)
     metrics = [eloss, siamloss] 
