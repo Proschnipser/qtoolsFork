@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
+import matplotlib
+matplotlib.use('Agg')
 import ast
 import pandas as pd
 import numpy as np
@@ -18,7 +19,7 @@ out_path = outfile_prefix+ '/trained_models_test/'
 
 # create a new subdir in your out_dir from local time
 out_dir = qt.update_dir(out_path)
-
+qt.create_dir(out_path)
 # =============================================================================
 # setting up training variables 
 # =============================================================================
@@ -26,9 +27,8 @@ out_dir = qt.update_dir(out_path)
 
 # variables for training 
 learning_rate = 0.001
-batch_size = 1
-epochs = 100
-epochs = 100
+batch_size = 2
+epochs = 2000
 mode='quartet'
 
 # file with training sequences 
@@ -121,7 +121,13 @@ matrix_i = multimodel.get_distance_matrix(prediction)
 qt.matrix2nexus(matrix_i, x_species,  out_dir + 'nexus/0.nex',
                 plot_now=True)
 
+# evaluate quartet scores
+scores = qt.get_qscores(matrix_i, x_species, scoring_batches)
 
+
+# evaluate loss
+batches = data.batchmaker(minibatches, edge_distance)
+losses = multimodel.evaluate(batches, return_dict=True)
 
 # initialize the tracking before the first epoch 
 t = Tracking(out_dir, y_names=x_species)
@@ -129,11 +135,12 @@ t = Tracking(out_dir, y_names=x_species)
 t.trackall(epoch=0, feature_vectors=prediction, score=scores, loss=losses)
 t.writeall()
 t.write_species_names()
-t.write_species_names()
+print("outdir",out_dir)
+(Path(out_dir) / 'nexus').mkdir(parents=True, exist_ok=True)
 
 for e in range(epochs):
 	# prepare training batches
-    batches = data.batchmaker(minibatches, batch_size, edge_distance) 
+    batches = data.batchmaker(minibatches, edge_distance, batch_size=batch_size) 
            
     # train quartetnet (or siamesenet)
     multimodel.fit(batches, batch_size = batch_size)         
@@ -149,7 +156,8 @@ for e in range(epochs):
     scores = qt.get_qscores(matrix_i, x_species, scoring_batches)
     
     # make splitstree diagram from distance matrix
-    qt.matrix2nexus(matrix=matrix_i, taxa=x_species, nexusfile='filename.nex', plot_now=True)   
+    #qt.matrix2nexus(matrix=matrix_i, taxa=x_species, nexusfile='filename.nex', plot_now=True)   
+    qt.matrix2nexus(matrix=matrix_i, taxa=x_species, nexusfile=f'{out_dir}nexus/{e+1}.nex', plot_now=True)
 
 
     # track the evaluated measures 
@@ -157,7 +165,7 @@ for e in range(epochs):
     t.writeall()
 
     # you can immediately plot the results if you want 
-    t.plotall(e+1, 'test', plot_live=True)
+    #t.plotall(e+1, 'test', plot_live=True)
     
     
     # save model weights 

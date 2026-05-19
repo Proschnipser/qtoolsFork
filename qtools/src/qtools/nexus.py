@@ -21,7 +21,7 @@ def matrix2nexus(matrix,
                  plot_now=True,
                  cmdfile=False,
                  cmdmode='a',
-                 splitstree_location='~/splitstree4/SplitsTree'):
+                 splitstree_location='/splitstree/splitstree4/SplitsTree'):
     
     # convert taxa names to nexus header
     num_of_taxa = len(matrix)
@@ -45,7 +45,8 @@ def matrix2nexus(matrix,
         6: '; END;',
     }
     text_out = '\n'.join(lines.values())
-
+    print(nexusfile)
+    
     # write out the nexus file
     with open(nexusfile, 'w') as outf:
         outf.write(text_out)

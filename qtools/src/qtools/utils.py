@@ -7,7 +7,7 @@ def update_dir(outdir_1):
     Takes a path as string. Creates a new subdirectory from datetime.now and adds it to the provided path.  
     Returns 'given_path/new_subdirectory/'
     """
-    outdir_1 = outdir_1.strip('/') + '/'
+    outdir_1 = outdir_1+ '/'
     dt = datetime.now().strftime("%Y_%m_%d__%H_%M_%S")
     newdir = outdir_1 + dt + '/'
     create_dir(newdir)

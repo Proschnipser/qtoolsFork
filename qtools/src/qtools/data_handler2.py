@@ -85,7 +85,7 @@ class qdata(pd.DataFrame):
         """
         import numpy as np 
         
-        if not hasattr(self, 'encoded'):
+        if not hasattr(self, 'mtxvector'):
             raise KeyError('no encoded seqs found. Please encode with qdata.encode before using batchmaker')
         
         for _ in range(epochs): 
@@ -101,8 +101,9 @@ class qdata(pd.DataFrame):
             
                 y_true = list(quartet_y_true[n:n+batch_size]) 
                 x_names = minibatches[n:n+batch_size].values
-                x_true = [[self.loc[i]['encoded'] for i in j] for j in x_names]
-                x_true = [[np.expand_dims(i, axis=0) for i in j] for j  in x_true]
+                x_true = [[self.loc[i]['mtxvector'] for i in j] for j in x_names]
+                #x_true = [[np.expand_dims(i, axis=0) for i in j] for j  in x_true]
+                x_true = [[np.expand_dims(np.array(i), axis=0) for i in j] for j in x_true]
                 yield x_true, y_true
      
 
