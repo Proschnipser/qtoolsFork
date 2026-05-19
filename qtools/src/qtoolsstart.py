@@ -57,6 +57,14 @@ data = qt.qdata(data)
 
 
 
+# initialize the tracking before the first epoch 
+t = Tracking(out_dir, y_names=x_species)
+# track evaluation before first run 
+t.trackall(epoch=0, feature_vectors=prediction, score=scores, loss=losses)
+t.writeall()
+t.write_species_names()
+t.write_species_names()
+
 for e in range(epochs):
 	# prepare training batches
     batches = data.batchmaker(minibatches, batch_size, edge_distance) 
@@ -76,3 +84,16 @@ for e in range(epochs):
     
     # make splitstree diagram from distance matrix
     qt.matrix2nexus(matrix=matrix_i, taxa=x_species, nexusfile='filename.nex', plot_now=True)   
+
+
+    # track the evaluated measures 
+    t.trackall(e+1, feature_vectors=prediction, loss=losses, score=scores)
+    t.writeall()
+
+    # you can immediately plot the results if you want 
+    t.plotall(e+1, 'test', plot_live=True)
+    
+    
+    # save model weights 
+    #multimodel.basemodel.save_weights(f'{out_dir}/weights/m{e}_weights.h5')
+  
