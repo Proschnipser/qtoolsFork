@@ -45,7 +45,7 @@ def download_pdb(pdbcode, datadir, downloadurl="http://files.rcsb.org/download/"
         print(str(err), file=sys.stderr)
         return None
 
-def read_cif(pdbcode, pdbfilenm):
+def read_cif(pdbcode, ciffilenm):
     """
     Read a PDB structure from a file.
     :param pdbcode: A PDB ID string
@@ -53,8 +53,8 @@ def read_cif(pdbcode, pdbfilenm):
     :return: a Bio.PDB.Structure object or None if something went wrong
     """
     try:
-        pdbparser = Bio.PDB.PDBParser(QUIET=True)   # suppress PDBConstructionWarning
-        struct = pdbparser.get_structure(pdbcode, pdbfilenm)
+        cifparser = Bio.PDB.MMCIFParser(QUIET=True)   # suppress PDBConstructionWarning
+        struct = cifparser.get_structure(pdbcode, ciffilenm)
         return struct
     except Exception as err:
         print(str(err), file=sys.stderr)
@@ -110,6 +110,7 @@ def extract_multi_seqrecords(pdbcodes, structures):
             # extract and store sequences as list of SeqRecord objects
             pps = ppb.build_peptides(chain)    # polypeptides
             seq = pps[0].get_sequence() # just take the first, hope there's no chain break
+            print(z-1, len(pdbcodes), len(structures))
             seqid = pdbcodes[z-1] #+"_"+ chain.id
             seqrec = Bio.SeqRecord.SeqRecord(seq, id=seqid, 
                 description="Sequence #{}, {}".format(z, seqid))
@@ -123,8 +124,17 @@ def get_calphas(struct):
     :param struct: A Bio.PDB.Structure object.
     :return: A list of Bio.PDB.Atom objects representing the C-alpha atoms in `struct`.
     """
-    calphas = [ atom for atom in struct.get_atoms() if atom.get_fullname() == " CA " ]
-    return calphas #https://stackoverflow.com/questions/10324674/parsing-a-pdb-file-in-python
+    ca_atoms = []
+
+    for model in struct:
+        for chain in model:
+            for residue in chain:
+                # HETATM records (water, ligands) are excluded by checking residue ID
+                if residue.id[0] == " ":  # Standard amino acid residues only
+                    if "CA" in residue:
+                        ca_atoms.append(residue["CA"])
+
+    return ca_atoms
 
 def calc_distance_matrix(atoms,flatten:bool):
     """Calculate the distance matrix for a list of atoms."""
