@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-
+import ast
 import pandas as pd
 import numpy as np
 from pathlib import Path
@@ -13,13 +13,26 @@ from qtools.data_tracking import metadata, mutationscheme, Tracking
 
 treefile= "/data/joscha/Downloads/SRw3UZCwUl830gEIOhHRkw_newick.tree"
 outfile_prefix = '/data/joscha/output/qtools/'+ str(Path(treefile).stem).replace(".tree","")+"/"
+# path for writing results 
+out_path = outfile_prefix+ '/trained_models_test/'
 
-batch_size=1
+# create a new subdir in your out_dir from local time
+out_dir = qt.update_dir(out_path)
+
+# =============================================================================
+# setting up training variables 
+# =============================================================================
+
+
+# variables for training 
+learning_rate = 0.001
+batch_size = 1
+epochs = 100
 epochs = 100
 mode='quartet'
 
 # file with training sequences 
-vector_file = ""
+vector_file = outfile_prefix+"vectors.csv"
 
 
 # file with edge length distance matrix 
@@ -31,6 +44,8 @@ minibatches_siamese = outfile_prefix + 'siamesebatches.csv'
 
 # file with quartet minibatches 
 minibatches_quartet = outfile_prefix + 'minibatches.csv'
+
+
 
 
 # if running as siamese model 
@@ -49,11 +64,62 @@ if mode == 'quartet':
     loss_function = Xsq_SiamReg(sigma)
     metrics = [eloss, siamloss] 
 
+# =============================================================================
+# prepare data 
+# =============================================================================
+
+# set up training data
 data = pd.read_csv(vector_file)
+data['mtxvector'] = data['mtxvector'].apply(ast.literal_eval)
+print("Data mtxvector:", type(data['mtxvector'][0]), data['mtxvector'][0])
 data = qt.qdata(data)
 
+#  read minibatches 
+minibatches = pd.read_csv(minibatch_file, index_col=0)
+edge_distance = pd.read_csv(edge_distance, index_col=0)
+scoring_batches = pd.read_csv(minibatches_quartet, index_col=0)
 
 
+# =========================================================================
+# set up model 
+# =========================================================================
+
+
+# set up model 
+vec_len = data.get_veclen()
+output_dims=5
+singlemodel = qt.fully_connected(vec_len,output_dims=output_dims)
+
+# build quartetnet or siamesenet
+multimodel = Multimodel.from_basemodel(singlemodel.model)
+multimodel.compile(optimizer=Nadam(learning_rate=0.001), loss=loss_function, metrics=metrics)
+
+
+x_vector, x_species = data.get_data()
+
+# track the metadata
+# you can inspect which variables are written to metadata with metadata.collected_keys
+# you can modify which data are tracked in qtools.data_tracking.metadata
+print(locals()['out_dir'])
+metadata.record(locals()).write()
+
+
+
+# =========================================================================
+# evaluate model before first run
+# =========================================================================
+
+# get feature vectors
+prediction = multimodel.predict(np.array(x_vector))
+
+# calculate the distance matrix (euclidean distances) from the feature vectores
+matrix_i = multimodel.get_distance_matrix(prediction)  
+
+# create a splits diagram from the distance matrix with splitstree.
+# the default directory for splitstree is '~/splitstree4/SplitsTree' 
+# but you can change it with option 'splitstree_location'
+qt.matrix2nexus(matrix_i, x_species,  out_dir + 'nexus/0.nex',
+                plot_now=True)
 
 
 
@@ -76,7 +142,7 @@ for e in range(epochs):
     losses = multimodel.history.history
     
     # calculate matrix with euclidean distances
-    prediction = multimodel.predict(x_encoded)
+    prediction = multimodel.predict(x_vector)
     matrix_i = multimodel.get_distance_matrix(prediction)
     
     # calculate quartet scores (check how many quartets are in right split)

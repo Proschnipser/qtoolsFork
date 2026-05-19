@@ -88,7 +88,11 @@ print(columnsofinterest)
 alignments=alignments[:-1]
 print(alignments)
 mtx_vectors=build_dstmtxs(columnsofinterest,alignments,structures, names_struct)
-print(mtx_vectors,len(mtx_vectors), IDs)
+print(mtx_vectors,len(mtx_vectors), IDs, train_names)
+print(mtx_vectors)
+vectors_df=pd.DataFrame({'spec': train_names, 'mtxvector': mtx_vectors})
+vectors_df.to_csv(outfile_prefix+"vectors.csv", index=False)
+
 # prune the reference tree to names from testing and write to file 
 tree = dp.prune_tree(ref_tree, train_names)
 dp.write_tree(tree, outfile_prefix+'tree.ph')

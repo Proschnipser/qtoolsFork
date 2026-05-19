@@ -8,7 +8,7 @@ import itertools
 
 class qdata(pd.DataFrame):
     
-    def __init__(self, data, sort=True, encoding_function=False):
+    def __init__(self, data, sort=False, encoding_function=False):
         """
         Parameters
         ----------
@@ -27,13 +27,16 @@ class qdata(pd.DataFrame):
         """
         
         super(qdata, self).__init__()
+        if sort:
+            data = data.sort_values('spec')
+        data.index = data['spec']
         pd.DataFrame.__init__(self, data)
         
-    def get_seqlen(self):
-        return len(self['seq'][0])
+    def get_veclen(self):
+        return len(self['mtxvector'][0])
         
     def get_data(self):    
-        x = list(self.encoded)
+        x = list(self.mtxvector)
         y = list(self.spec)
         return x, y
            
