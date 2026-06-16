@@ -21,6 +21,7 @@ def MuliIndexConverter(MSAseqs):
     posColIdx=[]
     for MSAseq in MSAseqs:
         posColIdx.append(IndexConverter(MSAseq))
+    return posColIdx
 
 
 def main():

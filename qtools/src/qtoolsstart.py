@@ -12,6 +12,7 @@ from qtools.lossfunctions import  siamloss_siamnet, Xsq_SiamReg, siamloss, eloss
 from qtools.quartettroutines import siamesemodel, quartetmodel
 from qtools.data_tracking import metadata, mutationscheme, Tracking
 
+
 treefile= "/data/joscha/Downloads/SRw3UZCwUl830gEIOhHRkw_newick.tree"
 outfile_prefix = '/data/joscha/output/qtools/'+ str(Path(treefile).stem).replace(".tree","")+"/"
 # path for writing results 
@@ -27,7 +28,7 @@ qt.create_dir(out_path)
 
 # variables for training 
 learning_rate = 0.001
-batch_size = 2
+batch_size = 1
 epochs = 2000
 mode='quartet'
 
