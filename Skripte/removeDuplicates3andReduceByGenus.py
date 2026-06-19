@@ -18,7 +18,7 @@ for i,r in df.iterrows():
         unique.add(seq)
         genuslist.add((r["OC"],r["name"]))
 df.drop(indices, inplace=True)
-print(len(unique))
+print("Length Unique:",len(unique))
 outputpath=os.path.splitext(filepath)[0]+"_dedup_reduced.csv"
 print(outputpath)
 df.to_csv(outputpath, index=False) # return deduplicated csv file.
