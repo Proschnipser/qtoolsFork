@@ -30,13 +30,26 @@ def extract_seqrecords(df, threshold_length, seqrecords):
             seqrecords.append(seqrec)
     return seqrecords
 
+def removeDuplicatesAndReduceByGenus(df):
+    unique=set()
+    genuslist=set()
+    indices=[]
+    for i,r in df.iterrows():
+        seq=r["Sequence"]
+        if seq in unique or (r["OC"],r["name"]) in genuslist: # check wether sequence is unique
+            indices.append(i)
+        else:
+            unique.add(seq)
+            genuslist.add((r["OC"],r["name"]))
+    df.drop(indices, inplace=True)
+    return df
 
 
 filepath=sys.argv[1]
 df=pd.read_csv(filepath)
 #df=pd.read_csv("/data/joscha/Data/TANGO1onlySP_dedup.csv")
 df=df[df["Prediciton"]=="SP"]
-sample_size=20
+sample_size=10
 threshold_length=89
 euteleostomi_OTOR=df[df["OC"].str.contains("Euteleostomi") & (df["name"]=="OTOR") & (df["Sequence cutted"].str.len()>=threshold_length)]
 euteleostomi_OTOR=(
