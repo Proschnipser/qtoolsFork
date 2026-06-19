@@ -138,7 +138,7 @@ Others=(
 print(len(Others))
 df=pd.concat([euteleostomi_TANGO1,euteleostomi_OTOR,euteleostomi_MIA,euteleostomi_TALI, Ecdysozoa, Spiralia, Others])
 print(len(df))
-fasta_out=os.path.splitext(filepath)[0]+"_andHMMer"+"_names.fasta"
+fasta_out=os.path.splitext(filepath)[0]+"_names.fasta"
 
 seqrecords=[]
 
