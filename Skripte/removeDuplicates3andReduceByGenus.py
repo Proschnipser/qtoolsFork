@@ -11,7 +11,7 @@ unique=set()
 genuslist=set()
 indices=[]
 for i,r in df.iterrows():
-    seq=r["Sequence"]
+    seq=r["Sequence cutted"]
     if seq in unique or (r["OC"],r["name"]) in genuslist: # check wether sequence is unique
         indices.append(i)
     else:

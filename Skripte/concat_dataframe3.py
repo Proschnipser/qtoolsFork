@@ -31,11 +31,16 @@ def extract_seqrecords(df, threshold_length, seqrecords):
     return seqrecords
 
 def removeDuplicatesAndReduceByGenus(df):
+    """
+    Removes rows with duplicates in column "Sequence cutted" or removes
+    @param df: df: Data frame from csv with exoasy annotation
+    @type: pandas dataframe
+    """
     unique=set()
     genuslist=set()
     indices=[]
     for i,r in df.iterrows():
-        seq=r["Sequence"]
+        seq=r["Cutted Sequence"]
         if seq in unique or (r["OC"],r["name"]) in genuslist: # check wether sequence is unique
             indices.append(i)
         else:
@@ -46,12 +51,18 @@ def removeDuplicatesAndReduceByGenus(df):
 
 
 filepath=sys.argv[1]
-df=pd.read_csv(filepath)
+df=pd.read_csv(filepath)#"/data/joscha/Data/"
 #df=pd.read_csv("/data/joscha/Data/TANGO1onlySP_dedup.csv")
 df=df[df["Prediciton"]=="SP"]
-sample_size=10
+df= removeDuplicatesAndReduceByGenus(df)
+filepath="/data/joscha/Data/uniprot"
+print(os.path.dirname(filepath)+"/MOTH")
+df.to_csv(os.path.dirname(filepath)+"/MOTHdedup.csv")
+
+
+sample_size=8
 threshold_length=89
-euteleostomi_OTOR=df[df["OC"].str.contains("Euteleostomi") & (df["name"]=="OTOR") & (df["Sequence cutted"].str.len()>=threshold_length)]
+euteleostomi_OTOR=df[df["OC"].str.contains("Euteleostomi") & (df["name"].str.contains("OTOR")) & (~df["name"].str.contains("vmtl.")) & (df["Sequence cutted"].str.len()>=threshold_length)]
 euteleostomi_OTOR=(
     euteleostomi_OTOR.groupby("Sequence cutted", group_keys=False)
     .apply(lambda g: g.sample(1))  # pick a random row per unique value
@@ -59,14 +70,14 @@ euteleostomi_OTOR=(
 )
 print(len(euteleostomi_OTOR))
 print(len(set(euteleostomi_OTOR["Sequence cutted"])))
-euteleostomi_MIA=df[df["OC"].str.contains("Euteleostomi") & (df["name"]=="MIA") & (df["Sequence cutted"].str.len()>=threshold_length)]
+euteleostomi_MIA=df[df["OC"].str.contains("Euteleostomi") & (df["name"].str.contains("MIA")) & (~df["name"].str.contains("vmtl.")) & (df["Sequence cutted"].str.len()>=threshold_length)]
 euteleostomi_MIA=(
     euteleostomi_MIA.groupby("Sequence cutted", group_keys=False)
     .apply(lambda g: g.sample(1))  # pick a random row per unique value
     .sample(n=sample_size, random_state=42)
 )
 print(len(euteleostomi_MIA))
-euteleostomi_TALI=df[df["OC"].str.contains("Euteleostomi") & (df["name"]=="TALI") & (df["Sequence cutted"].str.len()>=threshold_length)]
+euteleostomi_TALI=df[df["OC"].str.contains("Euteleostomi") & (df["name"].str.contains("TALI")) & (~df["name"].str.contains("vmtl.")) & (df["Sequence cutted"].str.len()>=threshold_length)]
 euteleostomi_TALI=(
     euteleostomi_TALI.groupby("Sequence cutted", group_keys=False)
     .apply(lambda g: g.sample(1))  # pick a random row per unique value
@@ -74,9 +85,9 @@ euteleostomi_TALI=(
 )
 print(len(euteleostomi_TALI))
 print(len(set(euteleostomi_TALI["Sequence cutted"])))
-Ecdysozoa=df[df["OC"].str.contains("Ecdysozoa") & (df["Sequence cutted"].str.len()>=threshold_length)]
-Ecdysozoa=(
-    Ecdysozoa.groupby("Sequence cutted", group_keys=False)
+Ecdysozoa_TANGO1=df[df["OC"].str.contains("Ecdysozoa") & (df["name"].str.contains("TANGO1")) & (~df["name"].str.contains("vmtl.")) & (df["Sequence cutted"].str.len()>=threshold_length)]
+Ecdysozoa_TANGO1=(
+    Ecdysozoa_TANGO1.groupby("Sequence cutted", group_keys=False)
     .apply(lambda g: g.sample(1))  # pick a random row per unique value
     .sample(n=sample_size, random_state=42)
 )
@@ -117,14 +128,14 @@ Others=(
 print(len(Others))
 df=pd.concat([euteleostomi_OTOR,euteleostomi_MIA,euteleostomi_TALI,euteleostomi_TANGO1, Ecdysozoa, Spiralia, Others])
 print(len(df))
-fasta_out=os.path.splitext(filepath)[0]+"_andHMMer"+"_names.fasta"
+fasta_out=os.path.splitext(filepath)[0]+"_allinclusive"+"_names.fasta"
 seqrecords=[]
 
 seqrecords=extract_seqrecords(df, threshold_length, seqrecords)
 print(len(set([x.seq for x in seqrecords])), len(seqrecords))
 sample_size=len(seqrecords)
 SeqIO.write(seqrecords, fasta_out, "fasta")
-aln_path=fasta_out.replace(".fasta",f"_thresh{threshold_length}aa_{sample_size}_TANGO1.fa")
+aln_path=fasta_out.replace(".fasta",f"_thresh{threshold_length}aa_{sample_size}.fa")
 aln_nex= aln_path.replace(".fa",".nex")
 #aln_path_phy= aln_path.replace(".fa",".phy")
 tree_path=aln_path.replace(".fa",".dnd")
