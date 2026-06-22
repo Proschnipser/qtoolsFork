@@ -53,7 +53,7 @@ def removeDuplicatesAndReduceByGenus(df):
 filepath=sys.argv[1]
 df=pd.read_csv(filepath)#"/data/joscha/Data/"
 #df=pd.read_csv("/data/joscha/Data/TANGO1onlySP_dedup.csv")
-df=df[df["Predicton"]=="SP"]
+df=df[df["Prediction"]=="SP"]
 df= removeDuplicatesAndReduceByGenus(df)
 filepath="/data/joscha/Data/uniprot"
 print(os.path.dirname(filepath)+"/MOTH")
