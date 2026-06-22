@@ -91,8 +91,8 @@ Ecdysozoa_TANGO1=(
     .apply(lambda g: g.sample(1))  # pick a random row per unique value
     .sample(n=sample_size, random_state=42)
 )
-print(len(Ecdysozoa))
-print(len(set(Ecdysozoa["Sequence cutted"])))
+print(len(Ecdysozoa_TANGO1))
+print(len(set(Ecdysozoa_TANGO1["Sequence cutted"])))
 
 euteleostomi_TANGO1=df[df["OC"].str.contains("Euteleostomi") & (df["name"].str.contains("TANGO1")) & (df["Sequence cutted"].str.len()>=threshold_length)]
 print("Length:", len(euteleostomi_TANGO1))
