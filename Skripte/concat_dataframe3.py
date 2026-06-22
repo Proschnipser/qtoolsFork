@@ -55,8 +55,8 @@ df=pd.read_csv(filepath)#"/data/joscha/Data/"
 #df=pd.read_csv("/data/joscha/Data/TANGO1onlySP_dedup.csv")
 df=df[df["Prediction"]=="SP"]
 df= removeDuplicatesAndReduceByGenus(df)
-filepath="/data/joscha/Data/uniprot"
-print(os.path.dirname(filepath)+"/MOTH")
+filepath="/data/joscha/Data/MOTHdedup.csv"
+print(os.path.dirname(filepath)+"/MOTHdedup.csv")
 df.to_csv(os.path.dirname(filepath)+"/MOTHdedup.csv")
 
 
