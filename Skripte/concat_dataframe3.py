@@ -60,7 +60,7 @@ print(os.path.dirname(filepath)+"/MOTHdedup.csv")
 df.to_csv(os.path.dirname(filepath)+"/MOTHdedup.csv")
 
 
-sample_size=8
+sample_size=10
 threshold_length=89
 euteleostomi_OTOR=df[df["OC"].str.contains("Euteleostomi") & (df["name"].str.contains("OTOR")) & (~df["name"].str.contains("vmtl.")) & (df["Sequence cutted"].str.len()>=threshold_length)]
 euteleostomi_OTOR=(
