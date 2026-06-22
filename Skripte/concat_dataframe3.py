@@ -40,7 +40,7 @@ def removeDuplicatesAndReduceByGenus(df):
     genuslist=set()
     indices=[]
     for i,r in df.iterrows():
-        seq=r["Cutted Sequence"]
+        seq=r["Sequence cutted"]
         if seq in unique or (r["OC"],r["name"]) in genuslist: # check wether sequence is unique
             indices.append(i)
         else:
