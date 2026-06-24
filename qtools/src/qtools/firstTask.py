@@ -2,7 +2,7 @@ from .pdbloader import *
 import os
 import Bio.PDB
 from Bio import SeqIO, Seq
-from Bio.Align.Applications import ClustalwCommandline
+#from Bio.Align.Applications import ClustalwCommandline
 from Bio import Align, AlignIO
 import re
 from .ColToPosToCol import *

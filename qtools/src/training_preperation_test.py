@@ -10,7 +10,7 @@ from qtools.firstTask import *
 from Bio import SeqIO, Seq , Align, AlignIO
 from qtools.ColToPosToCol import *
 import numpy as np
-
+import plotly.express as px
 import matplotlib
 #matplotlib.use('Qt5Agg')
 import matplotlib.pyplot as plt
@@ -18,11 +18,19 @@ from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 from sklearn.manifold import TSNE
 #matplotlib.use('Agg')
-
+import plotly
+import webbrowser
+import subprocess
 
 
 
 def find_best_perplexity(X, perplexity_range=(5, 50), n_steps=6, n_iter=300, random_state=42):
+    """
+    Perplexity sweep.
+    Tries different perplexities with the aim to select the best one based on lowest divergence
+    @param X: scaled input X for t-SNE analysis
+    @type X: numpy array
+    """
     n_samples = X.shape[0]
     p_min = max(2, perplexity_range[0])
     p_max = min(perplexity_range[1], (n_samples - 1) / 3)
@@ -43,7 +51,7 @@ def find_best_perplexity(X, perplexity_range=(5, 50), n_steps=6, n_iter=300, ran
     print(f"\nBest perplexity: {best_perplexity}")
     return best_perplexity
 
-def plot_PCA(mtx_vectors,labels, outfile_prefix):
+def plot_PCA_TSNE(mtx_vectors, names, outfile_prefix):
     # Convert to array
     X = np.array(mtx_vectors)
 
@@ -101,7 +109,7 @@ def plot_PCA(mtx_vectors,labels, outfile_prefix):
 
     # Adjust perplexity depending on dataset size
 
-    tsne = TSNE(perplexity=find_best_perplexity(X_scaled))
+    tsne = TSNE(perplexity=10)#find_best_perplexity(X_scaled))
 
     X_tsne = tsne.fit_transform(X_scaled)
 
@@ -109,7 +117,8 @@ def plot_PCA(mtx_vectors,labels, outfile_prefix):
     print(X_tsne[:5])
     df = pd.read_csv("/data/joscha/Data/uniprot_2025_01_08_MIAs_02_MOTHs.csv", index_col='no.')
     regex= re.compile(r"_(\d+)_")
-    for i,label in enumerate(labels):
+    labels=names.copy()
+    for i,label in enumerate(names):
         index= int(re.search(regex, label).group(1))
         #print( index)
         #print(";".join(df.iloc[index]["OC"].split(";")[2:5]))
@@ -149,10 +158,33 @@ def plot_PCA(mtx_vectors,labels, outfile_prefix):
     borderaxespad=0.
     )
 
-    plt.tight_layout(rect=[0, 0, 0.85, 1])  # reserve 15% width for legend
-    plt.show()
+    
     plt.savefig(outfile_prefix+"tsne.png", dpi=300, bbox_inches="tight")
     plt.close()
+    plt.tight_layout(rect=[0, 0, 0.85, 1])  # reserve 15% width for legend
+    plt.show()
+    
+    
+    colors  = ['#534AB7', '#1D9E75', '#D85A30', '#BA7517']
+
+
+    df = pd.DataFrame(X_tsne, columns=['t-SNE 1', 't-SNE 2'])
+    df['Class'] = labels
+    df['Names'] = names
+    
+    fig = px.scatter(df, x='t-SNE 1', y='t-SNE 2',
+                     color='Class',
+                     title='Interactive t-SNE',
+                     hover_data={'t-SNE 1': ':.2f', 't-SNE 2': ':.2f'},
+                     hover_name='Names')
+    fig.update_traces(marker=dict(size=9, opacity=0.85))
+    filepath=outfile_prefix+"tsne.html"
+    fig.write_html(filepath)  # opens in browser; zoom, pan, hover all work out of the box
+    subprocess.Popen([
+        "firefox",
+        "--new-tab",
+        filepath
+    ])
 
 
 referencestructure= "/data/joscha/3D-Structures/boltz_results_MOTH_1_55_TGO1_HUMAN_Reviewed__1907_AA_TANGO1_homolog/predictions/MOTH_1_55_TGO1_HUMAN_Reviewed__1907_AA_TANGO1_homolog/MOTH_1_55_TGO1_HUMAN_Reviewed__1907_AA_TANGO1_homolog_model_0.cif"
@@ -239,21 +271,22 @@ print("Columnsofinterest:", columnsofinterest)
 mtx_vectors=build_dstmtxs(columnsofinterest,alignments,structures, names_struct)
 #print(mtx_vectors,len(mtx_vectors), IDs, train_names)
 print("mtx_vector:",len(mtx_vectors[0]), len(columnsofinterest))
-plot_PCA(mtx_vectors, list(train_names), outfile_prefix)
 
-# vectors_df=pd.DataFrame({'spec': train_names, 'mtxvector': mtx_vectors})
-# vectors_df.to_csv(outfile_prefix+"vectors.csv", index=False)
+plot_PCA_TSNE(mtx_vectors, list(train_names), outfile_prefix)
 
-# # prune the reference tree to names from testing and write to file 
-# tree = dp.prune_tree(ref_tree, train_names)
-# dp.write_tree(tree, outfile_prefix+'tree.ph')
+vectors_df=pd.DataFrame({'spec': train_names, 'mtxvector': mtx_vectors})
+vectors_df.to_csv(outfile_prefix+"vectors.csv", index=False)
 
-# minibatches= dp.get_quartets_from_tree(tree)
-# #print(minibatches)
-# minibatches.to_csv(outfile_prefix  + 'minibatches.csv')
+# prune the reference tree to names from testing and write to file 
+tree = dp.prune_tree(ref_tree, train_names)
+dp.write_tree(tree, outfile_prefix+'tree.ph')
 
-# siamesebatches = itertools.combinations(train_names, 2)
-# pd.DataFrame(siamesebatches).to_csv(outfile_prefix  + 'siamesebatches.csv')
+minibatches= dp.get_quartets_from_tree(tree)
+#print(minibatches)
+minibatches.to_csv(outfile_prefix  + 'minibatches.csv')
 
-# distances = dp.get_edgelength(tree, train_names)
-# distances.to_csv(outfile_prefix  + 'patristic.csv')
+siamesebatches = itertools.combinations(train_names, 2)
+pd.DataFrame(siamesebatches).to_csv(outfile_prefix  + 'siamesebatches.csv')
+
+distances = dp.get_edgelength(tree, train_names)
+distances.to_csv(outfile_prefix  + 'patristic.csv')

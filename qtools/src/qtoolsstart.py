@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import matplotlib
-matplotlib.use('Agg')
 import ast
 import pandas as pd
 import numpy as np
@@ -11,6 +10,7 @@ import qtools as qt
 from qtools.lossfunctions import  siamloss_siamnet, Xsq_SiamReg, siamloss, eloss
 from qtools.quartettroutines import siamesemodel, quartetmodel
 from qtools.data_tracking import metadata, mutationscheme, Tracking
+import sys, os, traceback
 
 
 treefile= "/data/joscha/Downloads/SRw3UZCwUl830gEIOhHRkw_newick.tree"
@@ -20,7 +20,8 @@ out_path = outfile_prefix+ '/trained_models_test/'
 
 # create a new subdir in your out_dir from local time
 out_dir = qt.update_dir(out_path)
-qt.create_dir(out_path)
+qt.create_dir(out_dir)
+qt.create_dir(out_dir+"/weights/")
 # =============================================================================
 # setting up training variables 
 # =============================================================================
@@ -29,7 +30,7 @@ qt.create_dir(out_path)
 # variables for training 
 learning_rate = 0.001
 batch_size = 1
-epochs = 2000
+epochs = 5
 mode='quartet'
 
 # file with training sequences 
@@ -145,6 +146,11 @@ for e in range(epochs):
            
     # train quartetnet (or siamesenet)
     multimodel.fit(batches, batch_size = batch_size)         
+    weights_path = f'{out_dir}/weights/m{e}_weights.h5'
+    os.makedirs(os.path.dirname(weights_path), exist_ok=True)
+    # save model weights 
+    multimodel.basemodel.save_weights(f'{out_dir}/weights/m{e}_weights.h5')
+    print("Saving to:", Path(f'{out_dir}/weights/m{e}_weights.h5').resolve())
 
     # evaluate epoche
     losses = multimodel.history.history
@@ -160,7 +166,10 @@ for e in range(epochs):
     #qt.matrix2nexus(matrix=matrix_i, taxa=x_species, nexusfile='filename.nex', plot_now=True)   
     qt.matrix2nexus(matrix=matrix_i, taxa=x_species, nexusfile=f'{out_dir}nexus/{e+1}.nex', plot_now=True)
 
-
+        
+    
+    
+    
     # track the evaluated measures 
     t.trackall(e+1, feature_vectors=prediction, loss=losses, score=scores)
     t.writeall()
@@ -169,6 +178,5 @@ for e in range(epochs):
     #t.plotall(e+1, 'test', plot_live=True)
     
     
-    # save model weights 
-    #multimodel.basemodel.save_weights(f'{out_dir}/weights/m{e}_weights.h5')
+    
   
