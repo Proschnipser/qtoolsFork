@@ -145,12 +145,11 @@ for e in range(epochs):
     batches = data.batchmaker(minibatches, edge_distance, batch_size=batch_size) 
            
     # train quartetnet (or siamesenet)
-    multimodel.fit(batches, batch_size = batch_size)         
-    weights_path = f'{out_dir}/weights/m{e}_weights.h5'
+    multimodel.fit(batches, batch_size = batch_size)
     os.makedirs(os.path.dirname(weights_path), exist_ok=True)
     # save model weights 
-    multimodel.basemodel.save_weights(f'{out_dir}/weights/m{e}_weights.h5')
-    print("Saving to:", Path(f'{out_dir}/weights/m{e}_weights.h5').resolve())
+    multimodel.basemodel.save_weights(f'{out_dir}/weights/m{e+1}_weights.h5')
+    print("Saving to:", Path(f'{out_dir}/weights/m{e+1}_weights.h5').resolve())
 
     # evaluate epoche
     losses = multimodel.history.history
