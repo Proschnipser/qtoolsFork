@@ -20,6 +20,7 @@ def fully_connected_model(vector_length,output_dims=5):
     model = Sequential([
         Dense(vector_length, activation='relu', input_shape=(vector_length,)),
         Dense(output_dims)#, activation='linear')
+        Dense(output_dims)
         ])
     return model
 
