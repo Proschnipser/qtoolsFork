@@ -19,7 +19,6 @@ def CNN_onehot_model(seq_len, output_dims=30):
 def fully_connected_model(vector_length,output_dims=5):
     model = Sequential([
         Dense(vector_length, activation='relu', input_shape=(vector_length,)),
-        Dense(output_dims)#, activation='linear')
         Dense(output_dims)
         ])
     return model
