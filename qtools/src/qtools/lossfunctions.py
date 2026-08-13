@@ -50,7 +50,6 @@ class Xsq_SiamReg(Loss):
             
         #####  e-loss  ####
         e_loss = eloss(y_true,y_pred)
-    
         ##### siamese regulation  ####
         if self.sigma !=  0: 
             siam_loss = siamloss(y_true,y_pred) 

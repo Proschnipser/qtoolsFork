@@ -61,7 +61,8 @@ def name_nodes_by_taxa(tree, edge_data, df):
     @return: String containing information about the taxonomy of the tree node
     @rtype: String
     """
-    regex = re.compile("(?<=_)\d+(?=_)")
+    #regex = re.compile("(?<=_)\d+(?=_)")
+    regex = re.compile("(?<=__)\d+")
     i=0
     for node in tree.traverse("postorder"):
         idlist=[]

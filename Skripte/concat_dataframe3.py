@@ -50,15 +50,16 @@ def removeDuplicatesAndReduceByGenus(df):
     return df
 
 
-filepath=sys.argv[1]
-df=pd.read_csv(filepath)#"/data/joscha/Data/"
-#df=pd.read_csv("/data/joscha/Data/TANGO1onlySP_dedup.csv")
-df=df[df["Prediction"]=="SP"]
-df= removeDuplicatesAndReduceByGenus(df)
-filepath="/data/joscha/Data/MOTHdedup.csv"
-print(os.path.dirname(filepath)+"/MOTHdedup.csv")
-df.to_csv(os.path.dirname(filepath)+"/MOTHdedup.csv")
+#filepath=sys.argv[1]
+# df=pd.read_csv(filepath)#"/data/joscha/Data/"
+# #df=pd.read_csv("/data/joscha/Data/TANGO1onlySP_dedup.csv")
+# df=df[df["Prediction"]=="SP"]
+# df= removeDuplicatesAndReduceByGenus(df)
+# print(os.path.dirname(filepath)+"/MOTHdedup.csv")
+# df.to_csv(os.path.dirname(filepath)+"/MOTHdedup.csv")
 
+filepath="/data/joscha/Data/MOTHdedup.csv"
+df=pd.read_csv(filepath)
 
 sample_size=10
 threshold_length=89
@@ -94,7 +95,7 @@ Ecdysozoa_TANGO1=(
 print(len(Ecdysozoa_TANGO1))
 print(len(set(Ecdysozoa_TANGO1["Sequence cutted"])))
 
-euteleostomi_TANGO1=df[df["OC"].str.contains("Euteleostomi") & (df["name"].str.contains("TANGO1")) & (df["Sequence cutted"].str.len()>=threshold_length)]
+euteleostomi_TANGO1=df[df["OC"].str.contains("Euteleostomi") & (df["name"].str.contains("TANGO1")) & (~df["name"].str.contains("vmtl.")) & (df["Sequence cutted"].str.len()>=threshold_length)]
 print("Length:", len(euteleostomi_TANGO1))
 euteleostomi_TANGO1=(
     euteleostomi_TANGO1.groupby("Sequence cutted", group_keys=False)
@@ -103,7 +104,7 @@ euteleostomi_TANGO1=(
 )
 print(len(euteleostomi_TANGO1))
 print(len(set(euteleostomi_TANGO1["Sequence cutted"])))
-Ecdysozoa=df[df["OC"].str.contains("Ecdysozoa") & (df["name"].str.contains("TANGO1")) & (df["Sequence cutted"].str.len()>=threshold_length)]
+Ecdysozoa=df[df["OC"].str.contains("Ecdysozoa") & (df["name"].str.contains("TANGO1")) & (~df["name"].str.contains("vmtl.")) & (df["Sequence cutted"].str.len()>=threshold_length)]
 Ecdysozoa=(
     Ecdysozoa.groupby("Sequence cutted", group_keys=False)
     .apply(lambda g: g.sample(1))  # pick a random row per unique value
@@ -112,23 +113,23 @@ Ecdysozoa=(
 print(len(Ecdysozoa))
 print(len(set(Ecdysozoa["Sequence cutted"])))
 
-Spiralia=df[df["OC"].str.contains("Spiralia") & (df["name"].str.contains("TANGO1")) & (df["Sequence cutted"].str.len()>=threshold_length)]
+Spiralia=df[df["OC"].str.contains("Spiralia") & (df["name"].str.contains("TANGO1")) & (~df["name"].str.contains("vmtl.")) & (df["Sequence cutted"].str.len()>=threshold_length)]
 Spiralia=(
     Spiralia.groupby("Sequence cutted", group_keys=False)
     .apply(lambda g: g.sample(1))  # pick a random row per unique value
     .sample(n=min(len(set(Spiralia["Sequence cutted"].values)),sample_size), random_state=42)
 )
 print(len(Spiralia))
-Others= df[~df["OC"].str.contains("Spiralia|Ecdysozoa|Euteleostomi") & (df["name"].str.contains("TANGO1")) & (df["Sequence cutted"].str.len()>=threshold_length)]
+Others= df[~df["OC"].str.contains("Spiralia|Ecdysozoa|Euteleostomi") & (df["name"].str.contains("TANGO1")) & (~df["name"].str.contains("vmtl.")) & (df["Sequence cutted"].str.len()>=threshold_length)]
 Others=(
     Others.groupby("Sequence cutted", group_keys=False)
     .apply(lambda g: g.sample(1))  # pick a random row per unique value
     .sample(n=min(len(set(Others["Sequence cutted"].values)),sample_size), random_state=42)
-)
+)   
 print(len(Others))
 df=pd.concat([euteleostomi_OTOR,euteleostomi_MIA,euteleostomi_TALI,euteleostomi_TANGO1, Ecdysozoa, Spiralia, Others])
 print(len(df))
-fasta_out=os.path.splitext(filepath)[0]+"_allinclusive"+"_names.fasta"
+fasta_out=os.path.splitext(filepath)[0]+"new_allinclusive"+"_names.fasta"
 seqrecords=[]
 
 seqrecords=extract_seqrecords(df, threshold_length, seqrecords)

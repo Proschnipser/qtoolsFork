@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 from qtools.encoding import onehot_encoding
 from tensorflow.keras import Sequential
-from tensorflow.keras.layers import Conv1D, AveragePooling1D, Flatten, Dense, Dropout
-
+from tensorflow.keras.layers import Input,Conv1D, AveragePooling1D, Flatten, Dense, Dropout, Softmax
+from qtools.regularizers import WeightEntropyRegularizer
+import numpy as np
    
 def CNN_onehot_model(seq_len, output_dims=30):
     model = Sequential(
@@ -16,10 +17,10 @@ def CNN_onehot_model(seq_len, output_dims=30):
          ])
     return model
 
-def fully_connected_model(vector_length,output_dims=5):
+def fully_connected_model(vector_length,mean_vector, output_dims=5):
     model = Sequential([
-        Dense(vector_length, activation='relu', input_shape=(vector_length,)),
-        Dense(output_dims)
+        Input(vector_length),
+        Dense(output_dims, kernel_regularizer=WeightEntropyRegularizer(mean_vector, strength=1e-3))
         ])
     return model
 
@@ -33,11 +34,12 @@ class CNN_ONEHOT:
         self.output_dims = output_dims
 
 class fully_connected:
-    def __init__(self, vector_length, output_dims=5):
-        self.model = fully_connected_model(vector_length, output_dims=output_dims)
+    def __init__(self, vector_length, mean_vector, output_dims=5):
+        self.model = fully_connected_model(vector_length, mean_vector, output_dims=output_dims)
         self.vector_length = vector_length
         self.input_dims =(vector_length,)
         self.output_dims = output_dims
+        self.mean_vector = mean_vector
 
 
 

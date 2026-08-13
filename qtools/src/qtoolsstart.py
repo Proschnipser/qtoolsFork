@@ -22,13 +22,15 @@ out_path = outfile_prefix+ '/trained_models_test/'
 out_dir = qt.update_dir(out_path)
 qt.create_dir(out_dir)
 qt.create_dir(out_dir+"/weights/")
+features_dir = out_dir+"/features/"
+qt.create_dir(features_dir)
 # =============================================================================
 # setting up training variables 
 # =============================================================================
 
 
 # variables for training 
-learning_rate = 0.001
+learning_rate = 0.0001
 batch_size = 1
 epochs = 5
 mode='quartet'
@@ -85,19 +87,22 @@ scoring_batches = pd.read_csv(minibatches_quartet, index_col=0)
 # =========================================================================
 # set up model 
 # =========================================================================
+x_vector, x_species = data.get_data()
+mean_vector = np.mean(x_vector, axis=0) 
 
-
+print(len(mean_vector))
+print(mean_vector)
 # set up model 
 vec_len = data.get_veclen()
 output_dims=5
-singlemodel = qt.fully_connected(vec_len,output_dims=output_dims)
+singlemodel = qt.fully_connected(vec_len,mean_vector,output_dims=output_dims)
 
 # build quartetnet or siamesenet
 multimodel = Multimodel.from_basemodel(singlemodel.model)
 multimodel.compile(optimizer=Nadam(learning_rate=0.001), loss=loss_function, metrics=metrics)
 
 
-x_vector, x_species = data.get_data()
+
 
 # track the metadata
 # you can inspect which variables are written to metadata with metadata.collected_keys
@@ -134,11 +139,11 @@ losses = multimodel.evaluate(batches, return_dict=True)
 # initialize the tracking before the first epoch 
 t = Tracking(out_dir, y_names=x_species)
 # track evaluation before first run 
-t.trackall(epoch=0, feature_vectors=prediction, score=scores, loss=losses)
-t.writeall()
+#t.trackall(epoch=0, feature_vectors=prediction, score=scores, loss=losses)
+#t.writeall()
 t.write_species_names()
 print("outdir",out_dir)
-(Path(out_dir) / 'nexus').mkdir(parents=True, exist_ok=True)
+(Path(out_dir) / "nexus").mkdir(parents=True, exist_ok=True)
 
 for e in range(epochs):
 	# prepare training batches
@@ -146,10 +151,10 @@ for e in range(epochs):
            
     # train quartetnet (or siamesenet)
     multimodel.fit(batches, batch_size = batch_size)
-    os.makedirs(os.path.dirname(weights_path), exist_ok=True)
+    #os.makedirs(os.path.dirname(weights_path), exist_ok=True)
     # save model weights 
     multimodel.basemodel.save_weights(f'{out_dir}/weights/m{e+1}_weights.h5')
-    print("Saving to:", Path(f'{out_dir}/weights/m{e+1}_weights.h5').resolve())
+    print("Saving to:", Path(f"{out_dir}/weights/m{e+1}_weights.h5").resolve())
 
     # evaluate epoche
     losses = multimodel.history.history
@@ -157,6 +162,10 @@ for e in range(epochs):
     # calculate matrix with euclidean distances
     prediction = multimodel.predict(x_vector)
     matrix_i = multimodel.get_distance_matrix(prediction)
+
+    # --- save feature vectors with names ---
+    
+    np.savez(features_dir+"/epoch_{e+1}.npz", names=np.array(x_species), features=prediction)
     
     # calculate quartet scores (check how many quartets are in right split)
     scores = qt.get_qscores(matrix_i, x_species, scoring_batches)
