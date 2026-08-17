@@ -78,9 +78,10 @@ def makeheatmaps(data,n, typ, title=False,saveto=False):#, gridspec_kw={'width_r
 
 weightdir="/data/joscha/output/qtools/SRw3UZCwUl830gEIOhHRkw_newick/trained_models_test/2026_07_14__13_03_44/weights/"
 h5_file=weightdir+"m5_weights.h5"#sys.argv[1]
-treefile= "/data/joscha/Downloads/SRw3UZCwUl830gEIOhHRkw_newick.tree"
+tree_origin= "/data/joscha/Downloads/SRw3UZCwUl830gEIOhHRkw_newick.tree"
 out_path= h5_file.replace(".h5", "_histogram.png")
-outfile_prefix = '/data/joscha/output/qtools/'+ str(Path(treefile).stem).replace(".tree","")+"/"
+outfile_prefix = '/data/joscha/output/qtools/'+ str(Path(tree_origin).stem).replace(".tree","")+"/"
+tree_file= outfile_prefix+'tree.ph'
 
 
 vector_file = outfile_prefix+"vectors.csv"
@@ -94,6 +95,12 @@ with h5py.File(h5_file, "r") as f:
     bias = f[f"dense/dense//bias:0"][:]
 number_of_bins=100
 print(f"avg_input shape: {avg_vector.shape}  ",f"(must match weights.shape[0] = {weights.shape[0]})")
+
+
+#wald test
+result = mtxvectors[:, None, :] * weights.T[None, :, :]
+print(result.shape)
+for node in tree.traverse("levelorder"):
 
 title="35 Taxa of TANGO1 with 62 gap-free columns"
 entropy=shannon_entropy(weights)

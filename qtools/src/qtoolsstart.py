@@ -163,9 +163,9 @@ for e in range(epochs):
     prediction = multimodel.predict(x_vector)
     matrix_i = multimodel.get_distance_matrix(prediction)
 
-    # --- save feature vectors with names ---
-    
-    np.savez(features_dir+"/epoch_{e+1}.npz", names=np.array(x_species), features=prediction)
+    # save feature vectors and names
+    np.savez(f"{features_dir}/epoch_{e+1}.npz", names=np.array(x_species), features=prediction)
+    print("Saving to:", Path(f"{features_dir}/epoch_{e+1}.npz").resolve())
     
     # calculate quartet scores (check how many quartets are in right split)
     scores = qt.get_qscores(matrix_i, x_species, scoring_batches)
