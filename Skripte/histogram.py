@@ -157,7 +157,7 @@ def wald_tests_on_tree(tree, leaf_values):
                 for j in range(x[0].shape[1]): #iterate over weighted distances
                     print(x[:][i].shape)
                     print(i,j)
-                    statistic, p_value = wald_test_two_groups(x[:][i][j], y[:][i][j])
+                    statistic, p_value = wald_test_two_groups([x[c][i][j] for c in range(x.shape[0])], [x[c][i][j] for c in range(x.shape[0])])
                     p_values.append(p_value)
                     statistics.append(statistic)
                 
