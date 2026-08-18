@@ -167,6 +167,7 @@ def wald_tests_on_tree(tree, leaf_values):
                     #"left_leaves": left_leaves,
                     #"right_leaves": right_leaves,
                     "neuron": i,
+                    "position_in_vector": j,
                     "n_left": len(x),
                     "n_right": len(y),
                     "wald_statistic": statistics,
