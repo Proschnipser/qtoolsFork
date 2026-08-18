@@ -162,10 +162,11 @@ def wald_tests_on_tree(tree, leaf_values):
                 "node": node.name,
                 #"left_leaves": left_leaves,
                 #"right_leaves": right_leaves,
+                "neuron": i,
                 "n_left": len(x),
                 "n_right": len(y),
-                "wald_statistic": statistic,
-                "p_value": p_value,
+                "wald_statistic": statistics,
+                "p_value": p_values,
             })
             if first:
                 print(results)
