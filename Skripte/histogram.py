@@ -176,7 +176,7 @@ def wald_tests_on_tree(tree, leaf_values):
                 if first:
                     print(results)
                     first=False
-        print(j)
+                print("J:",j)
     return results
 
 weightdir="/data/joscha/output/qtools/SRw3UZCwUl830gEIOhHRkw_newick/trained_models_test/2026_07_14__13_03_44/weights/"
