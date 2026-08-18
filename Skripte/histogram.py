@@ -167,9 +167,9 @@ def wald_tests_on_tree(tree, leaf_values):
                 "wald_statistic": statistic,
                 "p_value": p_value,
             })
-        if first:
-            print(results)
-            first=False
+            if first:
+                print(results)
+                first=False
 
     return results
 
