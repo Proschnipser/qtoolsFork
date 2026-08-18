@@ -148,6 +148,7 @@ def wald_tests_on_tree(tree, leaf_values):
 
         x = [leaf_values[name] for name in left_leaves]
         y = [leaf_values[name] for name in right_leaves]
+        print(y[0].shape)
         if len(x) > 2 and len(y) > 2:
             p_values=[]
             statistics=[]
