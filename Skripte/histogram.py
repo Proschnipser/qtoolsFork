@@ -199,7 +199,7 @@ result = mtxvectors[:, None, :] * weights.T[None, :, :]
 print(result.shape)
 tree = Tree(tree_file, format=1)
 leaf_values = dict()
-leaf_names = sorted(tree.get_leaf_names(),key=lambda x: int(re.search(r"__\d+_", x).group()))
+leaf_names = sorted(tree.get_leaf_names(),key=lambda x: int(re.search(r"__(\d+)_", x).group()))
 print(leaf_names)
 for i in range(result.shape[0]):
     leaf_values[leaf_names[i]]= result[i]
