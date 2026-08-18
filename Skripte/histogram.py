@@ -151,7 +151,7 @@ def wald_tests_on_tree(tree, leaf_values):
         if len(x) > 2 or len(y) > 2:
             p_values=[]
             statistics=[]
-            for neuron_x, neuron_y in (x,y): #iterate over neurons
+            for neuron_x, neuron_y in zip(x,y): #iterate over neurons
                 for i in range(len(neuron_x)): #iterate over weighted distances
                     statistic, p_value = wald_test_two_groups(neuron_x[i], neuron_y[i])
                     p_values.append(p_value)
@@ -199,7 +199,6 @@ result = mtxvectors[:, None, :] * weights.T[None, :, :]
 print(result.shape)
 tree = Tree(tree_file, format=1)
 leaf_values = dict()
-print(tree.get_leaf_names())
 leaf_names = sorted(tree.get_leaf_names(),key=lambda x: int(re.search(r"_(\d+)_", x).group(1)))
 print(leaf_names)
 for i in range(result.shape[0]):
