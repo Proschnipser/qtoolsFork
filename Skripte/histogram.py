@@ -150,15 +150,13 @@ def wald_tests_on_tree(tree, leaf_values):
         y = [leaf_values[name] for name in right_leaves]
         
         if len(x) > 2 and len(y) > 2:
-            print(y[0].shape)
+            print(x[0].shape)
             exit()
             p_values=[]
             statistics=[]
-            j=0
-            for neuron_x, neuron_y in zip(x,y): #iterate over neurons
-                j+=1
+            for i in range(x[0].shape[0]): #iterate over neurons
                 print(neuron_x,j,len(x))
-                for i in range(len(neuron_x)): #iterate over weighted distances
+                for j in range(x[0].shape[1]): #iterate over weighted distances
                     statistic, p_value = wald_test_two_groups(neuron_x[i], neuron_y[i])
                     p_values.append(p_value)
                     statistics.append(statistic)
@@ -177,7 +175,7 @@ def wald_tests_on_tree(tree, leaf_values):
                 if first:
                     print(results)
                     first=False
-
+        print(j)
     return results
 
 weightdir="/data/joscha/output/qtools/SRw3UZCwUl830gEIOhHRkw_newick/trained_models_test/2026_07_14__13_03_44/weights/"
