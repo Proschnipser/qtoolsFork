@@ -14,6 +14,9 @@ import sys
 import matplotlib.pyplot as plt
 from math import sqrt
 import matplotlib.colors as mcolors
+from ete3 import Tree
+from scipy import stats
+import re
 
 def shannon_entropy(weights, bins='auto', value_range=None):
     counts, _ = np.histogram(weights.flatten(), bins='auto', range=value_range)
@@ -76,6 +79,100 @@ def makeheatmaps(data,n, typ, title=False,saveto=False):#, gridspec_kw={'width_r
     plt.savefig(out_path.replace("histogram","grid").replace(".png","_"+typ+".png"), dpi=300)
     plt.close(fig)
 
+def wald_test_two_groups(x, y):
+    """
+    Wald test for difference in means between two independent groups.
+
+    Returns:
+        statistic, p_value
+    """
+    x = np.asarray(x, dtype=float)
+    y = np.asarray(y, dtype=float)
+
+    nx = len(x)
+    ny = len(y)
+
+    mean_diff = np.mean(x) - np.mean(y)
+
+    # Standard errors of the two sample means
+    se = np.sqrt(
+        np.var(x, ddof=1) / nx +
+        np.var(y, ddof=1) / ny
+    )
+
+    wald_stat = mean_diff / se
+    p_value = 2 * stats.norm.sf(abs(wald_stat))
+
+    return wald_stat, p_value
+
+
+def wald_tests_on_tree(tree, leaf_values):
+    """
+    Run a Wald test between the leaves of the two children
+    of every internal node, including the root.
+
+    Parameters
+    ----------
+    tree : ete3
+        Parsed ete3 tree
+
+    leaf_values : dict
+        Mapping from leaf name to numeric value.
+
+    Returns
+    -------
+    results : list of dict
+    """
+
+    results = []
+    first=True
+    # traverse() includes the root and all internal nodes
+    for node in tree.traverse("postorder"):
+
+        # Skip leaves
+        if node.is_leaf():
+            continue
+
+        children = node.children
+
+        # This assumes a strictly binary tree
+        if len(children) != 2:
+            raise ValueError(
+                f"Node {node.name!r} does not have exactly two children"
+            )
+
+        left, right = children
+
+        left_leaves = left.get_leaf_names()
+        right_leaves = right.get_leaf_names()
+
+        x = [leaf_values[name] for name in left_leaves]
+        y = [leaf_values[name] for name in right_leaves]
+        if len(x) > 2 or len(y) > 2:
+            p_values=[]
+            statistics=[]
+            for neuron_x, neuron_y in (x,y): #iterate over neurons
+                for i in range(len(neuron_x)): #iterate over weighted distances
+                    statistic, p_value = wald_test_two_groups(neuron_x[i], neuron_y[i])
+                    p_values.append(p_value)
+                    statistics.append(statistic)
+                
+
+            results.append({
+                "node": node.name,
+                "left_leaves": left_leaves,
+                "right_leaves": right_leaves,
+                "n_left": len(x),
+                "n_right": len(y),
+                "wald_statistic": statistic,
+                "p_value": p_value,
+            })
+        if first:
+            print(results)
+            first=False
+
+    return results
+
 weightdir="/data/joscha/output/qtools/SRw3UZCwUl830gEIOhHRkw_newick/trained_models_test/2026_07_14__13_03_44/weights/"
 h5_file=weightdir+"m5_weights.h5"#sys.argv[1]
 tree_origin= "/data/joscha/Downloads/SRw3UZCwUl830gEIOhHRkw_newick.tree"
@@ -100,7 +197,13 @@ print(f"avg_input shape: {avg_vector.shape}  ",f"(must match weights.shape[0] = 
 #wald test
 result = mtxvectors[:, None, :] * weights.T[None, :, :]
 print(result.shape)
-for node in tree.traverse("levelorder"):
+tree = Tree(tree_file, format=1)
+leaf_values = dict()
+leaf_names = sorted(names,key=lambda x: int(re.search(r"__\d+_", x).group()))
+print(leaf_names)
+for i in range(result.shape[0]):
+    leaf_values[leaf_names[i]]= result[i]
+wald_tests_on_tree(tree,leaf_values)
 
 title="35 Taxa of TANGO1 with 62 gap-free columns"
 entropy=shannon_entropy(weights)
@@ -112,7 +215,6 @@ f"Entropy={entropy:.3f} bits", out_path, bins = number_of_bins)
 norm_weights= weights*avg_vector[:, None]
 print(norm_weights.shape)
 np.save(weightdir+"norm_weights.npy", norm_weights)
-exit()
 entropy_norm = shannon_entropy(norm_weights,bins=number_of_bins)
 print(f"Entropy of normalized weights: {entropy_norm:.4f} bits")
 plot_histogram(
