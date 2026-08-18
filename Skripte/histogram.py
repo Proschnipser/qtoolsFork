@@ -154,7 +154,7 @@ def wald_tests_on_tree(tree, leaf_values):
             j=0
             for neuron_x, neuron_y in zip(x,y): #iterate over neurons
                 j+=1
-                print(neuron_x,j)
+                print(neuron_x,j,len(x))
                 for i in range(len(neuron_x)): #iterate over weighted distances
                     statistic, p_value = wald_test_two_groups(neuron_x[i], neuron_y[i])
                     p_values.append(p_value)
