@@ -200,7 +200,7 @@ print(result.shape)
 tree = Tree(tree_file, format=1)
 leaf_values = dict()
 print(tree.get_leaf_names())
-leaf_names = sorted(tree.get_leaf_names(),key=lambda x: int(re.search(r"__(\d+)_", x).group(1)))
+leaf_names = sorted(tree.get_leaf_names(),key=lambda x: int(re.search(r"_(\d+)_", x).group(1)))
 print(leaf_names)
 for i in range(result.shape[0]):
     leaf_values[leaf_names[i]]= result[i]
