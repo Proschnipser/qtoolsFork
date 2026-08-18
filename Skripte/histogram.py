@@ -160,8 +160,8 @@ def wald_tests_on_tree(tree, leaf_values):
 
             results.append({
                 "node": node.name,
-                "left_leaves": left_leaves,
-                "right_leaves": right_leaves,
+                #"left_leaves": left_leaves,
+                #"right_leaves": right_leaves,
                 "n_left": len(x),
                 "n_right": len(y),
                 "wald_statistic": statistic,
