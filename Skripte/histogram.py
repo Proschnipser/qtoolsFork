@@ -148,7 +148,7 @@ def wald_tests_on_tree(tree, leaf_values):
 
         x = [leaf_values[name] for name in left_leaves]
         y = [leaf_values[name] for name in right_leaves]
-        if len(x) > 2 or len(y) > 2:
+        if len(x) > 2 and len(y) > 2:
             p_values=[]
             statistics=[]
             for neuron_x, neuron_y in zip(x,y): #iterate over neurons
