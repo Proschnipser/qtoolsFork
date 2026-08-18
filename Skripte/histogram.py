@@ -204,7 +204,7 @@ print(leaf_names)
 for i in range(result.shape[0]):
     leaf_values[leaf_names[i]]= result[i]
 wald_tests_on_tree(tree,leaf_values)
-
+exit()
 title="35 Taxa of TANGO1 with 62 gap-free columns"
 entropy=shannon_entropy(weights)
 plot_histogram(weights, title,
