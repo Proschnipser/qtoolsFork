@@ -146,8 +146,8 @@ def wald_tests_on_tree(tree, leaf_values):
         left_leaves = left.get_leaf_names()
         right_leaves = right.get_leaf_names()
 
-        x = np.array(leaf_values[name] for name in left_leaves)
-        y = np.array(leaf_values[name] for name in right_leaves)
+        x = np.array([leaf_values[name] for name in left_leaves])
+        y = np.array([leaf_values[name] for name in right_leaves])
         print(x.shape)
         if len(x) > 2 and len(y) > 2:
             
