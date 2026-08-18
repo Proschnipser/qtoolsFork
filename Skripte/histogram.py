@@ -146,11 +146,11 @@ def wald_tests_on_tree(tree, leaf_values):
         left_leaves = left.get_leaf_names()
         right_leaves = right.get_leaf_names()
 
-        x = [leaf_values[name] for name in left_leaves]
-        y = [leaf_values[name] for name in right_leaves]
+        x = np.array(leaf_values[name] for name in left_leaves)
+        y = np.array(leaf_values[name] for name in right_leaves)
         
         if len(x) > 2 and len(y) > 2:
-            print(x[0].shape)
+            print(x.shape)
             p_values=[]
             statistics=[]
             for i in range(x[0].shape[0]): #iterate over neurons
