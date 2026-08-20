@@ -100,7 +100,7 @@ def wald_test_two_groups(x, y):
         np.var(y, ddof=1) / ny
     )
 
-    wald_stat = mean_diff / se
+    wald_stat = (mean_diff / se) ** 2
     p_value = 2 * stats.norm.sf(abs(wald_stat))
 
     return wald_stat, p_value
