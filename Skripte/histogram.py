@@ -226,7 +226,7 @@ wald_on_result=wald_tests_on_tree(tree,leaf_values)
 wald_on_features=wald_tests_on_tree(tree, leaf_features)
 np.save("/data/joscha/output/qtools/SRw3UZCwUl830gEIOhHRkw_newick/trained_models_test/2026_08_10__19_30_58/wald_on_result.npy", wald_on_result, allow_pickle=True)
 np.save("/data/joscha/output/qtools/SRw3UZCwUl830gEIOhHRkw_newick/trained_models_test/2026_08_10__19_30_58/wald_on_features.npy", wald_on_features, allow_pickle=True)
-print(wald_on_result)
+exit()
 title="35 Taxa of TANGO1 with 62 gap-free columns"
 entropy=shannon_entropy(weights)
 plot_histogram(weights, title,
@@ -236,7 +236,6 @@ f"Entropy={entropy:.3f} bits", out_path, bins = number_of_bins)
 
 norm_weights= weights*avg_vector[:, None]
 print(norm_weights.shape)
-exit()
 np.save(weightdir+"norm_weights.npy", norm_weights)
 entropy_norm = shannon_entropy(norm_weights,bins=number_of_bins)
 print(f"Entropy of normalized weights: {entropy_norm:.4f} bits")
