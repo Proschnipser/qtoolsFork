@@ -148,42 +148,54 @@ def wald_tests_on_tree(tree, leaf_values):
 
         x = np.array([leaf_values[name] for name in left_leaves])
         y = np.array([leaf_values[name] for name in right_leaves])
-        print(x.shape)
+        #print("Shapes",x.shape, y.shape)
         if len(x) > 2 and len(y) > 2:
             
             p_values=[]
             statistics=[]
             for i in range(x[0].shape[0]): #iterate over neurons
-                for j in range(x[0].shape[1]): #iterate over weighted distances
-                    print(i,j)
-                    statistic, p_value = wald_test_two_groups([x[c][i][j] for c in range(x.shape[0])], [x[c][i][j] for c in range(x.shape[0])])
-                    p_values.append(p_value)
-                    statistics.append(statistic)
+                if len(x.shape) == 3:
+                    for j in range(x[0].shape[1]): #iterate over weighted distances
+                        #print(i,j)
+                        statistic, p_value = wald_test_two_groups([x[c][i][j] for c in range(x.shape[0])], [y[c][i][j] for c in range(y.shape[0])])
                 
 
-                results.append({
-                    "node": node.name,
-                    #"left_leaves": left_leaves,
-                    #"right_leaves": right_leaves,
-                    "neuron": i,
-                    "position_in_vector": j,
-                    "n_left": len(x),
-                    "n_right": len(y),
-                    "wald_statistic": statistics,
-                    "p_value": p_values,
-                })
-                if first:
-                    print(results)
-                    first=False
-                print("J:",j)
+                        results.append({
+                            "node": node.name,
+                            #"left_leaves": left_leaves,
+                            #"right_leaves": right_leaves,
+                            "neuron": i,
+                            "position_in_vector": j,
+                            "n_left": len(x),
+                            "n_right": len(y),
+                            "wald_statistic": statistic,
+                            "p_value": p_value,
+                    })
+                else:
+                    print(i)
+                    statistic, p_value = wald_test_two_groups([x[c][i] for c in range(x.shape[0])], [y[c][i] for c in range(y.shape[0])])
+            
+
+                    results.append({
+                        "node": node.name,
+                        #"left_leaves": left_leaves,
+                        #"right_leaves": right_leaves,
+                        "neuron": i,
+                        "n_left": len(x),
+                        "n_right": len(y),
+                        "wald_statistic": statistic,
+                        "p_value": p_value,
+                    })
+                    
     return results
 
-weightdir="/data/joscha/output/qtools/SRw3UZCwUl830gEIOhHRkw_newick/trained_models_test/2026_07_14__13_03_44/weights/"
+weightdir="/data/joscha/output/qtools/SRw3UZCwUl830gEIOhHRkw_newick/trained_models_test/2026_08_10__19_30_58/weights/"
 h5_file=weightdir+"m5_weights.h5"#sys.argv[1]
 tree_origin= "/data/joscha/Downloads/SRw3UZCwUl830gEIOhHRkw_newick.tree"
 out_path= h5_file.replace(".h5", "_histogram.png")
 outfile_prefix = '/data/joscha/output/qtools/'+ str(Path(tree_origin).stem).replace(".tree","")+"/"
 tree_file= outfile_prefix+'tree.ph'
+features_file=weightdir.split("weights")[0]+"features/epoch_5.npz"
 
 
 vector_file = outfile_prefix+"vectors.csv"
@@ -193,23 +205,28 @@ mtxvectors = np.array(data['mtxvector'].tolist())
 avg_vector = mtxvectors.mean(axis=0)#.tolist()
 
 with h5py.File(h5_file, "r") as f:
-    weights = f[f"dense/dense/kernel:0"][:]
-    bias = f[f"dense/dense//bias:0"][:]
+    weights = f[f"dense_4/dense_4/kernel:0"][:]
+    bias = f[f"dense_4/dense_4//bias:0"][:]
 number_of_bins=100
 print(f"avg_input shape: {avg_vector.shape}  ",f"(must match weights.shape[0] = {weights.shape[0]})")
-
+features=np.load(features_file)["features"]
 
 #wald test
 result = mtxvectors[:, None, :] * weights.T[None, :, :]
 print(result.shape)
 tree = Tree(tree_file, format=1)
-leaf_values = dict()
+leaf_values,leaf_features = dict(),dict()
 leaf_names = sorted(tree.get_leaf_names(),key=lambda x: int(re.search(r"_(\d+)_", x).group(1)))
 print(leaf_names)
 for i in range(result.shape[0]):
     leaf_values[leaf_names[i]]= result[i]
-wald_tests_on_tree(tree,leaf_values)
-exit()
+    leaf_features[leaf_names[i]]=features[i]
+print(result.shape,features.shape)
+wald_on_result=wald_tests_on_tree(tree,leaf_values)
+wald_on_features=wald_tests_on_tree(tree, leaf_features)
+np.save("/data/joscha/output/qtools/SRw3UZCwUl830gEIOhHRkw_newick/trained_models_test/2026_08_10__19_30_58/wald_on_result.npy", wald_on_result, allow_pickle=True)
+np.save("/data/joscha/output/qtools/SRw3UZCwUl830gEIOhHRkw_newick/trained_models_test/2026_08_10__19_30_58/wald_on_features.npy", wald_on_features, allow_pickle=True)
+print(wald_on_result)
 title="35 Taxa of TANGO1 with 62 gap-free columns"
 entropy=shannon_entropy(weights)
 plot_histogram(weights, title,
@@ -219,6 +236,7 @@ f"Entropy={entropy:.3f} bits", out_path, bins = number_of_bins)
 
 norm_weights= weights*avg_vector[:, None]
 print(norm_weights.shape)
+exit()
 np.save(weightdir+"norm_weights.npy", norm_weights)
 entropy_norm = shannon_entropy(norm_weights,bins=number_of_bins)
 print(f"Entropy of normalized weights: {entropy_norm:.4f} bits")
