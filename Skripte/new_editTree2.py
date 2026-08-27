@@ -62,7 +62,7 @@ def name_nodes_by_taxa(tree, edge_data, df):
     @rtype: String
     """
     #regex = re.compile("(?<=_)\d+(?=_)")
-    regex = re.compile("(?<=__)\d+")
+    regex = re.compile("(?<=_)\d+")
     i=0
     for node in tree.traverse("postorder"):
         idlist=[]
@@ -87,7 +87,7 @@ edge_data = get_terminal_species_for_edges(tree)
 tree= name_nodes_by_taxa(tree,edge_data, df)
 # for node in tree.traverse("postorder"):
 #     print(node)
-output= filepath.replace("con.tree", "_annotatedname.tree").replace(".con.nwk", "_annotatedname.tree")
+output= filepath.replace("con.tree", "_annotatedname.tree").replace(".con.nwk", "_annotatedname.tree").replace(".nwk", "_annotatedname.tree")
 print(output)
 tree.write(outfile=output, format=1)
 # Print results

@@ -71,16 +71,19 @@ def name_nodes_by_taxa(tree, edge_data, df):
     @rtype: String
     """
     #regex = re.compile("(?<=_)\d+(?=_)")
-    regex = re.compile("(?<=__)\d+")
+    regex = re.compile("(?<=_)\d+")
     i=0
     for node in tree.traverse("postorder"):
         idlist=[]
         if not node.is_leaf():
             #if not node.name:
+            print("edgedata",edge_data[id(node)])
             for name in edge_data[id(node)]:
                 m=re.search(regex, name)
                 if m:
                     idlist.append(int(m.group()))
+                else:
+                    print("no")
             print(idlist)
             node.name = find_taxa(idlist, df)
             node.name="'"+str(i)+" "+node.name+"'"

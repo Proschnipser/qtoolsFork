@@ -151,15 +151,16 @@ def wald_tests_on_tree(tree, leaf_values):
         #print("Shapes",x.shape, y.shape)
         if len(x) > 2 and len(y) > 2:
             
-            p_values=[]
+            p_values=np.zeros((1891,5))
             statistics=[]
             for i in range(x[0].shape[0]): #iterate over neurons
                 if len(x.shape) == 3:
                     for j in range(x[0].shape[1]): #iterate over weighted distances
                         #print(i,j)
-                        statistic, p_value = wald_test_two_groups([x[c][i][j] for c in range(x.shape[0])], [y[c][i][j] for c in range(y.shape[0])])
+                        statistic, p_value = wald_test_two_groups([x[c,i,j] for c in range(x.shape[0])], [y[c,i,j] for c in range(y.shape[0])])
                 
-
+                        p_values[j][i]=p_value
+                        
                         results.append({
                             "node": node.name,
                             #"left_leaves": left_leaves,
@@ -173,9 +174,9 @@ def wald_tests_on_tree(tree, leaf_values):
                     })
                 else:
                     print(i)
-                    statistic, p_value = wald_test_two_groups([x[c][i] for c in range(x.shape[0])], [y[c][i] for c in range(y.shape[0])])
+                    statistic, p_value = wald_test_two_groups([x[c,i] for c in range(x.shape[0])], [y[c,i] for c in range(y.shape[0])])
             
-
+                    
                     results.append({
                         "node": node.name,
                         #"left_leaves": left_leaves,
@@ -183,10 +184,10 @@ def wald_tests_on_tree(tree, leaf_values):
                         "neuron": i,
                         "n_left": len(x),
                         "n_right": len(y),
-                        "wald_statistic": statistic,
                         "p_value": p_value,
+                        "wald_statistic": statistic,
                     })
-                    
+            print(p_values)
     return results
 
 weightdir="/data/joscha/output/qtools/SRw3UZCwUl830gEIOhHRkw_newick/trained_models_test/2026_08_10__19_30_58/weights/"
@@ -212,8 +213,13 @@ print(f"avg_input shape: {avg_vector.shape}  ",f"(must match weights.shape[0] = 
 features=np.load(features_file)["features"]
 
 #wald test
+print(weights.shape)                      # expect (1891, 5)
+print(np.allclose(weights[:, 0], weights[:, 1]))   # True? confirms neuron columns are identical
+print(weights[:5])                        # eyeball a few rows across all 5 neuron columns
+exit()
 result = mtxvectors[:, None, :] * weights.T[None, :, :]
-print(result.shape)
+print(result[0].shape)
+print(result[0,:,0])
 tree = Tree(tree_file, format=1)
 leaf_values,leaf_features = dict(),dict()
 leaf_names = sorted(tree.get_leaf_names(),key=lambda x: int(re.search(r"_(\d+)_", x).group(1)))
@@ -226,7 +232,7 @@ wald_on_result=wald_tests_on_tree(tree,leaf_values)
 wald_on_features=wald_tests_on_tree(tree, leaf_features)
 np.save("/data/joscha/output/qtools/SRw3UZCwUl830gEIOhHRkw_newick/trained_models_test/2026_08_10__19_30_58/wald_on_result.npy", wald_on_result, allow_pickle=True)
 np.save("/data/joscha/output/qtools/SRw3UZCwUl830gEIOhHRkw_newick/trained_models_test/2026_08_10__19_30_58/wald_on_features.npy", wald_on_features, allow_pickle=True)
-exit()
+sys.exit()
 title="35 Taxa of TANGO1 with 62 gap-free columns"
 entropy=shannon_entropy(weights)
 plot_histogram(weights, title,
