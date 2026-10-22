@@ -34,23 +34,24 @@ def extract_seqrecords(df, threshold_length):
 def removeDuplicatesAndReduceByGenus(df):
     """
     Removes rows with duplicates in column "Sequence cutted" or removes
-    @param df: df: Data frame from csv with exoasy annotation
+    @param df: Data frame from csv with exoasy annotation
     @type: pandas dataframe
     """
     unique=set()
     genuslist=set()
     indices=[]
+    #numbers=[]
     for i,r in df.iterrows():
         seq=r["Sequence cutted"]
         if seq in unique or (r["OC"],r["name"]) in genuslist: # check wether sequence is unique
             indices.append(i)
-        else:
-            unique.add(seq)
-            genuslist.add((r["OC"],r["name"]))
+            #numbers.append((r["no."],r["OC"].split(";")[-1],r["name"]) )
+        unique.add(seq)
+        genuslist.add((r["OC"],r["name"]))
     df.drop(indices, inplace=True)
-    return df
+    return df 
 
-directory="/data/joscha/Data/MOTH_uniprot_filtered_labeled"
+directory="/data/joscha/Data/MOTH_uniprot_filtered_labeled2"
 df_dict = dict()
 reg=re.compile("confident_([^_]+)_.*?(sheet.*)")
 for file in Path(directory).glob("*.csv"):
@@ -60,24 +61,24 @@ for file in Path(directory).glob("*.csv"):
         name="_".join(name.groups())
         print(name)
         df_dict[name]  = pd.read_csv(file)
-namelist = ['MIA_sheet','OTOR_sheet_no_outlier','TALI_sheet_no_outlier','TANGO1_sheet_no_outlier', 'TANGO1_sheet_Helix_residues_no_outlier'] 
-df=pd.concat([df_dict[name] for name in namelist])
-df_dict['TANGO1_sheet_Helix_residues_no_outlier'].rename(columns={df.columns[0]: "no."}, inplace=True)
-df_dict['TANGO1_sheet_no_outlier'].rename(columns={df.columns[0]: "no."}, inplace=True)
-set1=set(df_dict['TANGO1_sheet_no_outlier']['no.'])
-set2=set(df_dict['TANGO1_sheet_Helix_residues_no_outlier']['no.'])
-print("Symmetric difference length:",len(set1 ^ set2))
-print("Difference length:",len(set1-set2))
+
+#namelist = ['TANGO1_sheet_no_outlier','TANGO1_sheet_Helix_residues_no_outlier', 'MIA_sheet','OTOR_sheet_no_outlier','TALI_sheet_no_outlier']
+
+namelist = ['TANGO1_sheet_no_outlier', 'MIA_sheet','OTOR_sheet_no_outlier','TALI_sheet_no_outlier']
+df=pd.concat([df_dict[name] for name in namelist], ignore_index=True)
+df.rename(columns={df.columns[0]: "no."}, inplace=True)
+
 for name in namelist:
     length=df_dict[name]["Sequence"].str.len()
     print(name, "Min:",length.min(), "Median:", length.median(), "Mean:", length.mean(),"Max:", length.max())
     print("Sequence cutted:")
     length=df_dict[name]["Sequence cutted"].str.len()
     print(name, "Min:",length.min(), "Median:", length.median(), "Mean:", length.mean(),"Max:", length.max())
-sys.exit()
-print(len(df))
+
+
 df= removeDuplicatesAndReduceByGenus(df)
-threshold_length= 99
+print(df["name"].value_counts())
+threshold_length= 0
 df= df[df["Sequence cutted"].str.len()>=threshold_length] 
 print(len(df))
 print(df["Sequence"].str.len().min() )

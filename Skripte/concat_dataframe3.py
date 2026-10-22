@@ -11,7 +11,7 @@ import random
 
 
 
-def extract_seqrecords(df, threshold_length, seqrecords):
+def extract_seqrecords(df, threshold_length):
     """
     Extracts cutted Sequences, ID(no.) and Accession Codes (AC),Organism Classification (OC)from dataframe df into SeqRecord objects return as a list.
     @param df: Data frame from csv with exoasy annotation
@@ -20,6 +20,7 @@ def extract_seqrecords(df, threshold_length, seqrecords):
     @rtype: list
     """
     global num
+    seqrecords=[]
     for i,r in df.iterrows(): 
         seq=Seq(r["Sequence cutted"])
         if threshold_length <= len(seq):
@@ -130,9 +131,8 @@ print(len(Others))
 df=pd.concat([euteleostomi_OTOR,euteleostomi_MIA,euteleostomi_TALI,euteleostomi_TANGO1, Ecdysozoa, Spiralia, Others])
 print(len(df))
 fasta_out=os.path.splitext(filepath)[0]+"new_allinclusive"+"_names.fasta"
-seqrecords=[]
 
-seqrecords=extract_seqrecords(df, threshold_length, seqrecords)
+seqrecords=extract_seqrecords(df, threshold_length)
 print(len(set([x.seq for x in seqrecords])), len(seqrecords))
 sample_size=len(seqrecords)
 SeqIO.write(seqrecords, fasta_out, "fasta")
