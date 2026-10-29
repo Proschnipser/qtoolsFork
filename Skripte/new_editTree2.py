@@ -87,7 +87,10 @@ edge_data = get_terminal_species_for_edges(tree)
 tree= name_nodes_by_taxa(tree,edge_data, df)
 # for node in tree.traverse("postorder"):
 #     print(node)
-output= filepath.replace("con.tree", "_annotatedname.tree").replace(".con.nwk", "_annotatedname.tree").replace(".nwk", "_annotatedname.tree")
+pattern = r"(\.con\.tree|\.nwk|\.phy_fastme_tree\.txt|.txt)$"
+
+# Replace whichever matches with your new suffix
+output = re.sub(pattern, "_annotatedname.tree", filepath)
 print(output)
 tree.write(outfile=output, format=1)
 # Print results

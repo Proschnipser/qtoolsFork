@@ -12,7 +12,6 @@ def get_terminal_species_for_edges(tree):
     Returns a dictionary where keys are node names (or internal identifiers)
     and values are lists of terminal species names descended from that node.
     """
-    # Load the tree
     
     
     edge_terminals = {}
@@ -24,9 +23,8 @@ def get_terminal_species_for_edges(tree):
         
         # Create a unique identifier for this edge/node,
         # You can use the node name if it exists, otherwise use id
-        node_id = id(node)
         
-        edge_terminals[node_id] = terminal_names
+        edge_terminals[id(node)] = terminal_names
     
     return edge_terminals
 
@@ -35,7 +33,7 @@ def find_taxa(IDs, df):
     Find common taxanomy in allsubnodes and returns the information as a String.
     @param IDs: IDs to find terminal nodes/species in dataframe
     @type IDs: list
-    @param df: Data frame from csv with exoasy annotation
+    @param df: Data frame from csv with expasy annotation
     @type df: pandas dataframe
     @return: String containing information about the taxonomy of the tree node
     @rtype: String
@@ -94,16 +92,17 @@ def name_nodes_by_taxa(tree, edge_data, df):
 
 df = pd.read_csv("/data/joscha/Data/uniprot_2025_01_08_MIAs_02_MOTHs.csv", index_col='no.')
 #newick_file = "/data/joscha/Data/output/TANGO1onlySP_dedup_names_aln.tree"
-filepath=sys.argv[1]
-newick_file= filepath
+newick_file=sys.argv[1]
 tree = Tree(newick_file, format=1)
 edge_data = get_terminal_species_for_edges(tree)
 tree= name_nodes_by_taxa(tree,edge_data, df)
 # for node in tree.traverse("postorder"):
 #     print(node)
 
-output= filepath.replace("con.tree", "_annotatedOC.tree").replace(".nwk", "_annotatedOC.tree")
-print(output)
+pattern = r"(\.con\.tree|\.nwk|\.phy_fastme_tree\.txt|.txt)$"
+
+# Replace whichever matches with your new suffix
+output = re.sub(pattern, "_annotatedOC.tree", filepath)
 tree.write(outfile=output, format=1)
 # Print results
 # for edge, terminals in edge_data.items():

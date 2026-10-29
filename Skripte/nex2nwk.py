@@ -13,4 +13,4 @@ tree = dendropy.Tree.get(
     schema="nexus"
 )
 
-tree.write(path=output, schema="newick")
+tree.write(path=output, schema="newick", suppress_rooting=True)
