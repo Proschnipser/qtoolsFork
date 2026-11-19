@@ -17,10 +17,10 @@ def CNN_onehot_model(seq_len, output_dims=30):
          ])
     return model
 
-def fully_connected_model(vector_length,mean_vector, output_dims=5):
+def fully_connected_model(vector_length,mean_vector, reg_strength, reg_temperatur, output_dims=5):
     model = Sequential([
         Input(vector_length),
-        Dense(output_dims, kernel_regularizer=WeightEntropyRegularizer(mean_vector, strength=1e-3))
+        Dense(output_dims, kernel_regularizer=WeightEntropyRegularizer(mean_vector, strength=reg_strength, temperature=reg_temperatur))
         ])
     return model
 
@@ -34,8 +34,8 @@ class CNN_ONEHOT:
         self.output_dims = output_dims
 
 class fully_connected:
-    def __init__(self, vector_length, mean_vector, output_dims=5):
-        self.model = fully_connected_model(vector_length, mean_vector, output_dims=output_dims)
+    def __init__(self, vector_length, mean_vector, reg_strength, reg_temperatur, output_dims=5):
+        self.model = fully_connected_model(vector_length, mean_vector,reg_strength,reg_temperatur, output_dims=output_dims)
         self.vector_length = vector_length
         self.input_dims =(vector_length,)
         self.output_dims = output_dims

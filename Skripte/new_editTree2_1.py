@@ -102,7 +102,7 @@ tree= name_nodes_by_taxa(tree,edge_data, df)
 pattern = r"(\.con\.tree|\.nwk|\.phy_fastme_tree\.txt|.txt)$"
 
 # Replace whichever matches with your new suffix
-output = re.sub(pattern, "_annotatedOC.tree", filepath)
+output = re.sub(pattern, "_annotatedOC.tree", newick_file)
 tree.write(outfile=output, format=1)
 # Print results
 # for edge, terminals in edge_data.items():

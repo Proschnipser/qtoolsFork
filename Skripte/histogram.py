@@ -11,6 +11,7 @@ import ast
 import numpy as np
 import h5py
 import sys
+import os
 import matplotlib.pyplot as plt
 from math import sqrt
 import matplotlib.colors as mcolors
@@ -55,11 +56,11 @@ def makeheatmaps(data,n, typ, title=False,saveto=False):#, gridspec_kw={'width_r
     im = None
     for k in range(data.shape[1]):
         z=0
-        print(k)
+        #print(k)
         for i in range(n-1):
             j=i+1
             while j<n:
-                print(i,j,z)
+                #print(i,j,z)
                 weight_mtx[i,j]=data[z,k]
                 z+=1
                 j+=1
@@ -71,7 +72,7 @@ def makeheatmaps(data,n, typ, title=False,saveto=False):#, gridspec_kw={'width_r
         #    ha='center', va='top', transform=ax[k].transAxes, fontsize=10)
         ax[k].set_title("output "+str(k))
     if saveto:
-        weight_mtx.save(saveto)
+        np.save(saveto, weight_mtx)
         
     cax = ax[-1].inset_axes([1.05, 0.05, 0.05, 0.9])
     fig.colorbar(im,cax=cax, label="weight value", location="right", orientation="vertical")
@@ -151,7 +152,7 @@ def wald_tests_on_tree(tree, leaf_values,mode):
         #print("Shapes",x.shape, y.shape)
         if len(x) > 2 and len(y) > 2:
             for i in range(len(x[0])): #iterate over neurons or distance vector (from matrix)
-                print(i)
+                #print(i)
                 statistic, p_value = wald_test_two_groups([x[c,i] for c in range(x.shape[0])], [y[c,i] for c in range(y.shape[0])])
                 if mode == "distances":
                         results.append({
@@ -177,13 +178,20 @@ def wald_tests_on_tree(tree, leaf_values,mode):
                         })
     return results
 
-weightdir="/data/joscha/output/qtools/SRw3UZCwUl830gEIOhHRkw_newick/trained_models_test/2026_08_10__19_30_58/weights/"
-h5_file=weightdir+"m5_weights.h5"#sys.argv[1]
-tree_origin= "/data/joscha/Downloads/SRw3UZCwUl830gEIOhHRkw_newick.tree"
+#weightdir="/data/joscha/output/qtools/TANGO1_sheet_Helix_residues_no_outlier_names_thresh0aa_333_annotatedname/trained_models_test/2026_11_03__06_43_43/weights/"
+#outfile_prefix = "/data/joscha/output/qtools/TANGO1_sheet_Helix_residues_no_outlier_names_thresh0aa_333_annotatedname/"
+weightdir=sys.argv[1]
+positions=sys.argv[2]
+
+weightdir= re.sub(r"/+", "/", weightdir)
+outfile_prefix = "/".join(weightdir.split("/")[:-4])+"/"
+outfile_prefix2= "/".join(weightdir.split("/")[:-2])+"/"
+print(outfile_prefix)
+h5_file=weightdir+"m3_weights.h5"#sys.argv[1]
 out_path= h5_file.replace(".h5", "_histogram.png")
-outfile_prefix = '/data/joscha/output/qtools/'+ str(Path(tree_origin).stem).replace(".tree","")+"/"
-tree_file= outfile_prefix+'tree.ph'
-features_file=weightdir.split("weights")[0]+"features/epoch_5.npz"
+
+tree_file= outfile_prefix+'treetest.ph'
+features_file=weightdir.split("weights")[0]+"features/epoch_3.npz"
 
 
 vector_file = outfile_prefix+"vectors.csv"
@@ -193,32 +201,38 @@ mtxvectors = np.array(data['mtxvector'].tolist())
 avg_vector = mtxvectors.mean(axis=0)#.tolist()
 
 with h5py.File(h5_file, "r") as f:
-    weights = f[f"dense_4/dense_4/kernel:0"][:]
-    bias = f[f"dense_4/dense_4//bias:0"][:]
+    def load_kernel(name, obj):
+        global weights
+        if 'dense' in name and 'kernel' in name and isinstance(obj, h5py.Dataset):
+            print(f"Layer path: {name}")
+            print(f"Weights shape: {obj.shape}")
+            weights = obj[:] # This is your numpy weight matrix
+            
+
+    f.visititems(load_kernel)
 number_of_bins=100
 print(f"avg_input shape: {avg_vector.shape}  ",f"(must match weights.shape[0] = {weights.shape[0]})")
 features=np.load(features_file)["features"]
 
-#wald test
 
 
 #result = mtxvectors[:, None, :] * weights.T[None, :, :]
 print(mtxvectors.shape)
 tree = Tree(tree_file, format=1)
 leaf_values,leaf_features = dict(),dict()
-leaf_names = sorted(tree.get_leaf_names(),key=lambda x: int(re.search(r"_(\d+)_", x).group(1)))
+leaf_names = sorted(tree.get_leaf_names(),key=lambda x: int(re.search(r"_(\d+)", x).group(1)))
 print(leaf_names)
 print(features.shape)
 for i in range(mtxvectors.shape[0]):
     leaf_values[leaf_names[i]]= mtxvectors[i]
     leaf_features[leaf_names[i]]=features[i]
 wald_on_distances=wald_tests_on_tree(tree,leaf_values, mode="distances")
-print(wald_on_distances)
-sys.exit()
+
 wald_on_features=wald_tests_on_tree(tree, leaf_features,mode="features")
-np.save("/data/joscha/output/qtools/SRw3UZCwUl830gEIOhHRkw_newick/trained_models_test/2026_08_10__19_30_58/wald_on_distances.npy", wald_on_distances, allow_pickle=True)
-np.save("/data/joscha/output/qtools/SRw3UZCwUl830gEIOhHRkw_newick/trained_models_test/2026_08_10__19_30_58/wald_on_features.npy", wald_on_features, allow_pickle=True)
-sys.exit()
+print(wald_on_features)
+np.save(outfile_prefix2+"wald_on_distances.npy", wald_on_distances, allow_pickle=True)
+np.save(outfile_prefix2+"wald_on_features.npy", wald_on_features, allow_pickle=True)
+
 title="35 Taxa of TANGO1 with 62 gap-free columns"
 entropy=shannon_entropy(weights)
 plot_histogram(weights, title,
@@ -229,6 +243,7 @@ f"Entropy={entropy:.3f} bits", out_path, bins = number_of_bins)
 norm_weights= weights*avg_vector[:, None]
 print(norm_weights.shape)
 np.save(weightdir+"norm_weights.npy", norm_weights)
+
 entropy_norm = shannon_entropy(norm_weights,bins=number_of_bins)
 print(f"Entropy of normalized weights: {entropy_norm:.4f} bits")
 plot_histogram(
@@ -253,7 +268,7 @@ print("n=",n)
 makeheatmaps(np.transpose(np.array([avg_vector])),
              n, 
              "averaged distances",
-             title=title)
+             title=title,saveto=outfile_prefix+"avgdist.npy")
 makeheatmaps(weights*np.transpose(np.array([avg_vector])),
               n, 
               "normalized experiment",
@@ -262,3 +277,6 @@ makeheatmaps(weights,
               n, 
               "raw weights",
               title=title)
+command=f"/data/joscha/Skripte/run-make-viewer.sh {outfile_prefix2} {positions}"
+print(command)
+os.system(command)

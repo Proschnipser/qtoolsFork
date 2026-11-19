@@ -110,7 +110,7 @@ def extract_multi_seqrecords(pdbcodes, structures):
             # extract and store sequences as list of SeqRecord objects
             pps = ppb.build_peptides(chain)    # polypeptides
             seq = pps[0].get_sequence() # just take the first, hope there's no chain break
-            print(z-1, len(pdbcodes), len(structures))
+            #print(z-1, len(pdbcodes), len(structures))
             seqid = pdbcodes[z-1] #+"_"+ chain.id
             seqrec = Bio.SeqRecord.SeqRecord(seq, id=seqid, 
                 description="Sequence #{}, {}".format(z, seqid))

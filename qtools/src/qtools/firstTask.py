@@ -49,17 +49,17 @@ def ColPicker(alignments):
 def build_dstmtxs(rndColumns,alignments, structures,pdbcodes):
     distance_mtxs=[]
     posColIdx=IndexBuilder(alignments)
-    print("PosColIdx:",posColIdx)
-    print("IDs:", alignments[0].id)
+    #print("PosColIdx:",posColIdx)
+    print("IDs:", alignments[0].id, len(alignments))
     for i in range(len(alignments)):
         atoms=[]
-        print("Dict:",pdbcodes[alignments[i].id])
+        #print("Dict:",pdbcodes[alignments[i].id])
         calphas=get_calphas(structures[pdbcodes[alignments[i].id]])
-        print(structures[0])
-        print(len(calphas))
+        #print(structures[0])
+        #print(len(calphas))
         for col in rndColumns:
-            print(col)
-            print(calphas[posColIdx[i][1][col]].get_parent())
+            #print(col)
+            #print(calphas[posColIdx[i][1][col]].get_parent())
             atoms.append(calphas[posColIdx[i][1][col]])
         distance_mtxs.append(calc_distance_matrix(atoms,flatten=True))
     return distance_mtxs
