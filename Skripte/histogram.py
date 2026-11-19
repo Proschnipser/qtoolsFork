@@ -187,11 +187,11 @@ weightdir= re.sub(r"/+", "/", weightdir)
 outfile_prefix = "/".join(weightdir.split("/")[:-4])+"/"
 outfile_prefix2= "/".join(weightdir.split("/")[:-2])+"/"
 print(outfile_prefix)
-h5_file=weightdir+"m3_weights.h5"#sys.argv[1]
+h5_file=weightdir+"m4_weights.h5"#sys.argv[1]
 out_path= h5_file.replace(".h5", "_histogram.png")
 
-tree_file= outfile_prefix+'treetest.ph'
-features_file=weightdir.split("weights")[0]+"features/epoch_3.npz"
+tree_file= outfile_prefix+'tree_name.ph'
+features_file=weightdir.split("weights")[0]+"features/epoch_4.npz"
 
 
 vector_file = outfile_prefix+"vectors.csv"

@@ -163,7 +163,7 @@ def plot_PCA_TSNE(mtx_vectors, names, outfile_prefix):
     
     plt.savefig(outfile_prefix+"tsne.png", dpi=300, bbox_inches="tight")
     plt.close()
-    plt.tight_layout(rect=[0, 0, 0.85, 1])  # reserve 15% width for legend
+    plt.tight_layout(rect=[0, 0, 0.85, 1])
     #plt.show()
     
     
@@ -181,7 +181,7 @@ def plot_PCA_TSNE(mtx_vectors, names, outfile_prefix):
                      hover_name='Names')
     fig.update_traces(marker=dict(size=9, opacity=0.85))
     filepath=outfile_prefix+"tsne.html"
-    fig.write_html(filepath)  # opens in browser; zoom, pan, hover all work out of the box
+    fig.write_html(filepath)
     """subprocess.Popen([
         "firefox",
         "--new-tab",
@@ -208,7 +208,7 @@ def maxpairwise_branchlength_selector(tree, numberOfTaxa, pdb_files=None, thresh
     dist_mat = np.zeros((num_leaves, num_leaves))
     distlist = []
 
-    # Compute upper triangle only (faster since distance is symmetric)
+    
     for i in range(num_leaves):
         for j in range(i + 1, num_leaves):
             d = tree.distance(leaves[i], leaves[j])
@@ -253,10 +253,10 @@ def workflow(numberOfTaxa):
     referencestructure= "/data/joscha/3D-Structures/boltz_results_MOTH_1_55_TGO1_HUMAN_Reviewed__1907_AA_TANGO1_homolog/predictions/MOTH_1_55_TGO1_HUMAN_Reviewed__1907_AA_TANGO1_homolog/MOTH_1_55_TGO1_HUMAN_Reviewed__1907_AA_TANGO1_homolog_model_0.cif"
     pdb_files = "/data/joscha/3D-Structures/"
     tree_file_name = sys.argv[1]
-    tree_file_OC = sys.argv[1].replace("name","OC")
-    ref_tree_OC= dp.read_tree(tree_file)
-    ref_tree_name = dp.read_tree(tree_file)
-    outfile_prefix = '/data/joscha/output/qtools/'+ str(Path(tree_file).stem).replace(".tree","")+f"_{numberOfTaxa}Test/"
+    tree_file_OC = sys.argv[1].replace("annotatedname","annotatedOC")
+    ref_tree_OC= dp.read_tree(tree_file_OC)
+    ref_tree_name = dp.read_tree(tree_file_name)
+    outfile_prefix = '/data/joscha/output/qtools/'+ str(Path(tree_file_name).stem).replace(".tree","")+f"_{numberOfTaxa}Test/"
     fasta_out=outfile_prefix+Path(pdb_files).name+".fasta"
     #positions_of_interest=[x-23 for x in [54,56,63,85,98,100,101]]
     #print("Positions of interest:", positions_of_interest)
@@ -352,26 +352,27 @@ def workflow(numberOfTaxa):
     vectors_df.to_csv(outfile_prefix+"vectors.csv", index=False)
 
     # prune the reference tree to names from testing and write to file 
-    tree_name = dp.prune_tree(ref_tree_name_name, train_names)
+    tree_name = dp.prune_tree(ref_tree_name, train_names)
     treefile_name=outfile_prefix+'tree_name.ph'
-    dp.write_tree(tree, treefile_name)
-    tree_OC = dp.prune_tree(ref_tree_name_OC, train_names)
+    dp.write_tree(tree_name, treefile_name)
+    tree_OC = dp.prune_tree(ref_tree_OC, train_names)
     treefile_OC=outfile_prefix+'tree_OC.ph'
     dp.write_tree(tree_OC, treefile_OC)
 
-    minibatches= dp.get_quartets_from_tree(tree)
+    minibatches= dp.get_quartets_from_tree(tree_name)
     #print(minibatches)
     minibatches.to_csv(outfile_prefix  + 'minibatches.csv')
 
     siamesebatches = itertools.combinations(train_names, 2)
     pd.DataFrame(siamesebatches).to_csv(outfile_prefix  + 'siamesebatches.csv')
 
-    distances = dp.get_edgelength(tree, train_names)
+    distances = dp.get_edgelength(tree_name, train_names)
     distances.to_csv(outfile_prefix  + 'patristic.csv')
     positionstxt=','.join([str(n) for n in columnsofinterest])
     with open(outfile_prefix+"position.txt", "w") as text_file:
         text_file.write(positionstxt)
-    os.system(f"python3 /data/joscha/qtoolsFork/qtools/src/qtoolsstart.py {treefile_name} {positionstxt}")
+    command=f"python3 /data/joscha/qtoolsFork/qtools/src/qtoolsstart.py {treefile_name} {positionstxt}"
+    os.system(command)
 
 def main():
     workflow(45)

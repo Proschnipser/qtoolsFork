@@ -2,7 +2,7 @@ import tensorflow as tf
 from tensorflow.keras import regularizers
 
 class WeightEntropyRegularizer(regularizers.Regularizer):
-    def __init__(self, mean_vector, strength=5e-1, epsilon=1e-8, varweight=10, temperature=0.8):
+    def __init__(self, mean_vector, strength=5e-1, epsilon=1e-8, varweight=100, temperature=0.8):
         """
         mean_vector: 1D array/tensor, shape (input_dim,)
                      mean of each input position across all training vectors

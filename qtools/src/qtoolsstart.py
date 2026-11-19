@@ -36,7 +36,7 @@ def workflow(output_dims,reg_strength, reg_temperatur):
     # variables for training 
     learning_rate = 0.0001
     batch_size = 1
-    epochs = 3
+    epochs = 4
     mode='quartet'
 
     # file with training sequences 
@@ -194,7 +194,7 @@ def workflow(output_dims,reg_strength, reg_temperatur):
 def main():
     output_dims=6
     reg_strength=0.005
-    reg_temperatur=0.825
+    reg_temperatur=0.87
     workflow(output_dims,reg_strength,reg_temperatur)
 
 if __name__ == '__main__':
