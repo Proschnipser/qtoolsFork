@@ -372,6 +372,8 @@ def workflow(numberOfTaxa):
     with open(outfile_prefix+"position.txt", "w") as text_file:
         text_file.write(positionstxt)
     command=f"python3 /data/joscha/qtoolsFork/qtools/src/qtoolsstart.py {treefile_name} {positionstxt}"
+    print(command)
+    sys.exit()
     os.system(command)
 
 def main():
